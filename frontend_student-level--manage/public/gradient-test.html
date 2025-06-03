@@ -1,0 +1,31 @@
+<!-- public/gradient-test.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>渐变背景测试</title>
+  <style>
+    /* 让 html/body 占满全屏，去除默认 margin */
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    /* 渐变背景全屏容器 */
+    .gradient-bg {
+      width: 100%;
+      height: 100%;
+      /* 你可以按需调整渐变方向和配色 */
+      background: linear-gradient(
+        135deg,
+        #e0f7fa 0%,
+        #e8edf3 50%,
+        #f3f6f9 100%
+      );
+    }
+  </style>
+</head>
+<body>
+  <div class="gradient-bg"></div>
+</body>
+</html>
