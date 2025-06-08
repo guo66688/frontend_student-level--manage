@@ -6,6 +6,12 @@
   padding: 2rem;
   font-weight: normal;
 } */
+#app {
+  width: 100%; /* 让应用占满宽度 */
+  height: 100vh; /* 高度占满视口 */
+  padding: 0; /* 去掉内边距 */
+  margin: 0; /* 去掉外边距 */
+}
 
 a,
 .green {

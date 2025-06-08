@@ -12,9 +12,12 @@ export interface ScoreTrendItem {
   avg: number
 }
 export interface PassRateItem {
-  course: string
-  rate: number
+  course_id: number
+  passed: number
+  total: number
+  rate: number // 如果你仍想把 rate 传百分比字符串，就改成 string
 }
+
 export interface RankItem {
   student_name: string
   avg_score: number

@@ -47,11 +47,11 @@
       </section>
       <!-- 2. 图表区 -->
       <section class="charts">
-        <div class="chart-large">
-          <v-chart :options="scoreTrendOptions" autoresize />
-        </div>
-        <div class="chart-small">
-          <v-chart :options="passRateOptions" autoresize />
+        <div class="chart-container">
+          <div class="chart-large" ref="chartLargeRef"></div>
+          <!-- 折线图容器 -->
+          <div class="chart-small" ref="chartSmallRef"></div>
+          <!-- 饼图容器 -->
         </div>
       </section>
       <!-- 3. 排行榜 -->
@@ -67,9 +67,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, shallowRef, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import VChart from 'vue-echarts'
+import * as echarts from 'echarts'
 import { use } from 'echarts/core'
 import {
   TitleComponent,
@@ -107,9 +107,13 @@ const stats = ref<StatCard[]>([
   { title: '平均成绩', value: 0 },
 ])
 
-const scoreTrendOptions = ref({})
-const passRateOptions = ref({})
+const scoreTrendOptions = shallowRef({}) // 浅层响应式
+const passRateOptions = shallowRef({})
 const rankList = ref<RankItem[]>([])
+
+// 使用 ECharts 实例类型
+const chartLargeRef = ref<echarts.ECharts | null>(null)
+const chartSmallRef = ref<echarts.ECharts | null>(null)
 
 onMounted(async () => {
   const statRes: DashboardStats = await getDashboardStats()
@@ -121,15 +125,28 @@ onMounted(async () => {
   ]
 
   const trend: ScoreTrendItem[] = await getScoreTrend()
+  console.log('拿到趋势数据：', trend)
+
   scoreTrendOptions.value = {
+    title: { text: '月度平均成绩趋势', left: 'center' },
     tooltip: { trigger: 'axis' },
+    legend: { data: ['平均成绩'], top: 30, left: 'center' },
     xAxis: { type: 'category', data: trend.map((t) => t.month) },
     yAxis: { type: 'value' },
-    series: [{ name: '平均成绩', type: 'line', data: trend.map((t) => t.avg), smooth: true }],
+    series: [
+      {
+        name: '平均成绩',
+        type: 'line',
+        data: trend.map((t) => t.avg),
+        smooth: true,
+      },
+    ],
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
   }
 
   const pass: PassRateItem[] = await getPassRate()
+  console.log('拿到通过率数据：', pass)
+
   passRateOptions.value = {
     tooltip: { trigger: 'item' },
     legend: { bottom: 0, left: 'center' },
@@ -138,12 +155,32 @@ onMounted(async () => {
         name: '通过率',
         type: 'pie',
         radius: ['40%', '70%'],
-        data: pass.map((p) => ({ name: p.course, value: Number((p.rate * 100).toFixed(1)) })),
+        data: [
+          { name: '数学', value: 85 },
+          { name: '语文', value: 90 },
+          { name: '英语', value: 75 },
+        ],
       },
     ],
   }
 
   rankList.value = (await getRankList()).slice(0, 10)
+  console.log('scoreTrendOptions:', scoreTrendOptions.value)
+  console.log('passRateOptions:', passRateOptions.value)
+
+  nextTick(() => {
+    if (chartLargeRef.value) {
+      const chartLargeInstance = echarts.init(chartLargeRef.value as HTMLElement)
+      chartLargeInstance.setOption(scoreTrendOptions.value)
+      chartLargeInstance.resize()
+    }
+
+    if (chartSmallRef.value) {
+      const chartSmallInstance = echarts.init(chartSmallRef.value as HTMLElement)
+      chartSmallInstance.setOption(passRateOptions.value)
+      chartSmallInstance.resize()
+    }
+  })
 })
 </script>
 
@@ -151,9 +188,9 @@ onMounted(async () => {
 .layout {
   display: flex;
   height: 100%;
+  overflow: hidden; /* 触发BFC布局计算 */
 }
 
-/* 侧栏：正常流占位；collapsed 类控制宽度 */
 .sidebar {
   width: 200px;
   transition: width 0.2s;
@@ -163,115 +200,135 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
 }
+
 .sidebar.collapsed {
   width: 64px;
 }
-.collapse-btn {
-  text-align: center;
-  padding: 12px 0;
-}
 
-/* 主区：flex:1 占满剩余宽度，自动紧贴侧栏 */
 .main-content {
-  flex: 1;
+  flex: 1; /* 使其占据剩余空间 */
   background: #f5f7fa;
   overflow-y: auto;
   padding: 24px;
-}
-
-/* 内容板块都 100% 宽 */
-.stats,
-.charts,
-.rank {
-  width: 100%;
+  width: 100%; /* 确保它的宽度占满 */
+  min-height: 0;
 }
 
 /* 1. 统计卡片 */
 .stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  justify-content: space-between; /* 使卡片水平排列 */
+  flex-wrap: wrap; /* 允许卡片换行 */
   gap: 20px;
   margin-bottom: 32px;
 }
+
 .stat-item {
   background: #fff;
   border-radius: 12px;
-  padding: 16px;
+  padding: 24px; /* 增加内边距使卡片内容更加分明 */
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition:
     transform 0.2s,
     box-shadow 0.2s;
+  width: 100%; /* 默认100%的宽度 */
+  max-width: 200px; /* 限制每个卡片的最大宽度 */
 }
+
 .stat-item:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
+
 .stat-title {
   font-size: 14px;
   color: #888;
   margin-bottom: 8px;
 }
+
 .stat-value {
   font-size: 28px;
   font-weight: 600;
-  color: #409eff;
+  color: #409eff; /* 卡片中的数字颜色 */
 }
 
-/* 2. 图表区 */
+/* 图表区 */
 .charts {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 20px;
+  display: flex;
+  gap: 20px; /* 增加图表间距 */
+  justify-content: space-between; /* 保证图表间有足够的空间 */
   margin-bottom: 32px;
+  width: 100%; /* 保证图表区的宽度占满 */
 }
-.chart-large,
-.chart-small {
-  background: #fff;
+
+/* 折线图 */
+.chart-large {
+  background: rgb(248, 245, 245);
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.2s;
+  flex: 2; /* 折线图占较大的空间 */
   height: 360px;
-}
-.chart-large:hover,
-.chart-small:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  min-width: 320px; /* 设置最小宽度 */
+  width: 100%;
+  position: relative;
 }
 
-/* 3. 排行榜 */
+/* 饼图 */
+.chart-small {
+  background: rgb(248, 245, 245);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  flex: 1; /* 饼图占较小空间 */
+  height: 360px;
+  min-width: 320px; /* 设置最小宽度 */
+  width: 100%;
+  position: relative;
+}
+
+.chart-container {
+  display: flex; /* 使用 flexbox 来排列图表 */
+  gap: 20px; /* 图表之间的间距 */
+  justify-content: space-between; /* 保证图表左右对齐 */
+  flex-wrap: wrap; /* 在容器宽度不足时换行 */
+}
+
 .rank {
   background: #fff;
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.2s;
 }
-.rank:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-}
+
 .rank h3 {
   margin-bottom: 16px;
   font-size: 18px;
   font-weight: 600;
 }
 
-/* 表格内边距微调 */
 :deep(.el-table th),
 :deep(.el-table td) {
   padding: 12px 8px;
 }
 
-/* 响应式 */
+/* 响应式布局 */
 @media (max-width: 992px) {
   .charts {
     grid-template-columns: 1fr;
   }
+
+  .chart-container {
+    flex-direction: column;
+  }
 }
+
 @media (max-width: 768px) {
   .stats {
     grid-template-columns: 1fr;
   }
+
   .stat-item {
     margin-bottom: 16px;
   }
