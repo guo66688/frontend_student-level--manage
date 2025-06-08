@@ -15,4 +15,10 @@ request.interceptors.request.use((config) => {
   return config
 })
 
+// —— 新增：把 response.data 直接返回 ——
+request.interceptors.response.use(
+  (response) => response.data,
+  (error) => Promise.reject(error)
+)
+
 export default request

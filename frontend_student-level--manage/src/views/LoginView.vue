@@ -1,3 +1,4 @@
+<!-- src\views\LoginView.vue -->
 <template>
   <div class="login-page">
     <!-- 顶栏 -->
