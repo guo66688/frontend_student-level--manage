@@ -1,24 +1,19 @@
 <!-- src\views\LoginView.vue -->
 <template>
   <div class="login-page">
-    <!-- 顶栏 -->
     <header class="login-header">
       <div class="header-left">
-        <img src="@/assets/logo.png" alt="Logo" class="header-logo" />
+        <img src="@/assets/logo.png" class="header-logo" />
         <span class="header-text">The Alchemists of Code</span>
       </div>
-      <!-- 如果还想保留“学生管理系统”标题，放到右侧 -->
       <div class="login-title">学生管理系统</div>
     </header>
 
-    <!-- 主内容区 -->
     <main class="login-main">
       <el-card class="login-card">
-        <!-- 内容容器 -->
         <div class="card-content">
           <h2 class="login-form-title">登录</h2>
-          <!-- 修正点：移除了标签属性内的注释 -->
-          <el-form :model="form" :rules="rules" ref="loginForm" label-position="top" status-icon>
+          <el-form ref="loginForm" :model="form" :rules="rules" label-position="top" status-icon>
             <el-form-item label="账号" prop="username">
               <el-input v-model="form.username" placeholder="请输入用户名" />
             </el-form-item>
@@ -31,25 +26,26 @@
               />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" class="login-button" @click="handleLogin" :loading="loading"
-                >立即登录</el-button
+              <el-button
+                type="primary"
+                class="login-button"
+                @click="handleLogin"
+                :loading="loading"
               >
+                立即登录
+              </el-button>
             </el-form-item>
           </el-form>
           <div class="login-footer">
-            <a href="#">忘记用户名</a>
-            <span>｜</span>
-            <a href="#">忘记密码</a>
+            <a href="#">忘记用户名</a><span>｜</span><a href="#">忘记密码</a>
           </div>
         </div>
-        <!-- 新增：卡片右下角小徽章 -->
         <div class="card-stamp">
-          <img src="@/assets/logo.png" alt="Logo Stamp" />
+          <img src="@/assets/logo.png" />
         </div>
       </el-card>
     </main>
 
-    <!-- 新增：页面底部出处 -->
     <footer class="login-attribution">
       出自 <a href="https://your-site.com" target="_blank">The Alchemists of Code</a>
     </footer>
@@ -61,32 +57,31 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { login } from '@/api/auth'
+import type { LoginResponse } from '@/api/auth'
 
 const router = useRouter()
 const loading = ref(false)
-
-const form = ref({
-  username: '',
-  password: '',
-})
+const form = ref({ username: '', password: '' })
+const loginForm = ref<InstanceType<(typeof import('element-plus'))['ElForm']>>()
 
 const rules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
 }
 
-const loginForm = ref()
-
 const handleLogin = async () => {
-  await loginForm.value.validate()
+  await loginForm.value!.validate()
   loading.value = true
   try {
-    const res = await login(form.value)
-    localStorage.setItem('token', res.data.token)
-    ElMessage.success('登录成功')
+    // 明确告知 TS：login() 会返回 LoginResponse
+    const res: LoginResponse = await login(form.value)
+    const { msg, token } = res
+    localStorage.setItem('token', token)
+    ElMessage.success(msg)
     router.push({ name: 'Home' })
-  } catch {
-    ElMessage.error('登录失败，请检查账号密码')
+  } catch (err: any) {
+    const tip = err.response?.data?.msg || err.message || '登录失败，请检查账号密码'
+    ElMessage.error(tip)
   } finally {
     loading.value = false
   }

@@ -1,11 +1,11 @@
 // src/api/auth.ts
 import request from './index'
 
-interface LoginRequest {
-  username: string
-  password: string
+export interface LoginResponse {
+  msg: string
+  token: string
 }
 
-export function login(data: LoginRequest) {
-  return request.post('/auth/login', data)
+export function login(data: { username: string; password: string }): Promise<LoginResponse> {
+  return request.post<LoginResponse>('/auth/login', data)
 }
