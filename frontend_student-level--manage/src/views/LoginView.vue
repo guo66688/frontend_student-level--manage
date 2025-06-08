@@ -2,6 +2,11 @@
   <div class="login-page">
     <!-- 顶栏 -->
     <header class="login-header">
+      <div class="header-left">
+        <img src="@/assets/logo.png" alt="Logo" class="header-logo" />
+        <span class="header-text">The Alchemists of Code</span>
+      </div>
+      <!-- 如果还想保留“学生管理系统”标题，放到右侧 -->
       <div class="login-title">学生管理系统</div>
     </header>
 
@@ -36,8 +41,17 @@
             <a href="#">忘记密码</a>
           </div>
         </div>
+        <!-- 新增：卡片右下角小徽章 -->
+        <div class="card-stamp">
+          <img src="@/assets/logo.png" alt="Logo Stamp" />
+        </div>
       </el-card>
     </main>
+
+    <!-- 新增：页面底部出处 -->
+    <footer class="login-attribution">
+      出自 <a href="https://your-site.com" target="_blank">The Alchemists of Code</a>
+    </footer>
   </div>
 </template>
 
@@ -69,7 +83,7 @@ const handleLogin = async () => {
     const res = await login(form.value)
     localStorage.setItem('token', res.data.token)
     ElMessage.success('登录成功')
-    router.push('/')
+    router.push({ name: 'Home' })
   } catch {
     ElMessage.error('登录失败，请检查账号密码')
   } finally {
@@ -79,6 +93,79 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
+/* 顶栏容器：中文标题居中，去掉左右 padding */
+.login-header {
+  position: relative;
+  display: flex;
+  justify-content: center; /* login-title 水平居中 */
+  align-items: center;
+  height: 60px;
+  background: #fff;
+  padding: 0; /* ← 去掉左右内边距，让 logo 能贴边 */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+}
+
+/* 左侧 logo + 文案：绝对定位脱离文档流 */
+.header-left {
+  position: absolute; /* ← 改成绝对定位 */
+  left: 16px; /* ← 距离左侧 16px，可按需改为 0 */
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+}
+
+/* 背景渐变（保留伪元素效果） */
+.header-left::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  width: 46px;
+  height: 32px;
+  background: linear-gradient(135deg, #e0f7fa, #f3f6f9);
+  border-radius: 8px;
+  transform: translateY(-50%);
+  z-index: -1;
+}
+
+/* Logo 圆形背景 + 阴影 */
+.header-logo {
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  background-color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  margin-right: 8px;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
+}
+.header-logo:hover {
+  transform: scale(1.05) rotate(3deg);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+}
+/* 文案样式 */
+.header-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 1px;
+  transition: color 0.2s;
+}
+.header-text:hover {
+  color: #017ffc;
+}
+
+/* 保留原本的登录页中文标题样式 */
+.login-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #000004c0;
+}
+
 /* 页面根容器 */
 .login-page {
   position: fixed;
@@ -86,26 +173,14 @@ const handleLogin = async () => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: linear-gradient(135deg, #e0f7fa 0%, #e8edf3 50%, #f3f6f9 100%);
   overflow: hidden;
-}
 
-/* 顶栏：标题居中 */
-.login-header {
-  height: 60px;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 24px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  z-index: 10;
-}
-
-.login-title {
-  font-size: 20px;
-  font-weight: bold;
-  color: #409eff;
+  /* ------------ 修改这里 ------------ */
+  /* 用半透明白层 + 壁纸 做背景 */
+  background:
+    /* 1. 让内容区变得更通透 */
+    linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)),
+    /* 2. 链接 public/ 下的 wallpaper.jpg */ url('/wallpaper.jpg') center/cover no-repeat;
 }
 
 /* 主内容区 */
@@ -117,18 +192,46 @@ const handleLogin = async () => {
   padding: 20px;
   box-sizing: border-box;
 }
-
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 /* 登录卡片 */
 .login-card {
+  position: relative; /* 确保内部绝对定位生效 */
   width: 100%;
-  max-width: 420px;
+  max-width: 480px;
   padding: 30px;
   border-radius: 12px;
-  background: #fff;
+  animation: slideUpFade 0.6s ease-out both;
+  /* background: #fff; */
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
   /* 修正点：移除 display: flex */
 }
+/* 卡片右下角的小徽章 */
+.card-stamp {
+  position: absolute;
+  right: 12px; /* 距离右边 12px */
+  bottom: 12px; /* 距离底部 12px */
+  width: 24px;
+  height: 24px;
+  opacity: 0.3; /* 半透明效果，可调整 */
+  pointer-events: none; /* 保证不影响卡片内交互 */
+}
 
+.card-stamp img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 /* 卡片内容容器 - 确保内容居中 */
 .card-content {
   width: 100%;
@@ -174,6 +277,15 @@ const handleLogin = async () => {
 :deep(.el-input) {
   width: 100%;
 }
+:deep(.el-input__inner) {
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+:deep(.el-input__inner):focus {
+  border-color: #409eff;
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.15);
+}
 
 /* 按钮样式 */
 .login-button {
@@ -183,8 +295,16 @@ const handleLogin = async () => {
   font-weight: 600;
   border-radius: 10px;
   margin-top: 10px;
+  background-image: linear-gradient(135deg, #409eff, #79b8ff);
+  border: none;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
-
+.login-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(64, 158, 255, 0.4);
+}
 /* 底部链接样式 */
 .login-footer {
   margin-top: 20px;
@@ -200,6 +320,25 @@ const handleLogin = async () => {
 .login-footer a {
   color: #409eff;
   text-decoration: none;
+}
+/* 1. 去掉 .el-input 容器的默认 focus outline */
+:deep(.el-input):focus,
+:deep(.el-input):focus-within {
+  outline: none !important;
+}
+
+/* 2. 去掉 .el-input__inner 原生的 outline（若有）*/
+:deep(.el-input__inner):focus {
+  outline: none !important;
+
+  /* 3. 自定义一个偏小的 focus 阴影 */
+  border-color: #409eff;
+  box-shadow: 0 0 0 1px rgba(64, 158, 255, 0.5);
+}
+
+/* 4. 同理，把 error 情况下的那个红色阴影收窄到 1px */
+:deep(.el-form-item.is-error .el-input__inner) {
+  box-shadow: 0 0 0 1px rgba(245, 92, 71, 0.5) !important;
 }
 
 /* 移动端适配 */
