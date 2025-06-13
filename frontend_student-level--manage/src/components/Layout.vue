@@ -1,3 +1,4 @@
+<!-- src\components\Layout.vue -->
 <template>
   <div class="app-container">
     <!-- 状态栏 -->
@@ -23,14 +24,16 @@
     <div class="content-container">
       <!-- 侧边栏 -->
       <aside class="sidebar" :class="{ collapsed: isCollapsed }">
-        <div class="collapse-btn">
+        <div class="collapse-btn-wrapper">
+          <!-- 使用注册的图标组件 -->
           <el-button
-            :icon="isCollapsed ? 'el-icon-s-unfold' : 'el-icon-s-fold'"
+            :icon="isCollapsed ? 'ElIconSFold' : 'ElIconSUnfold'"
             @click="isCollapsed = !isCollapsed"
             circle
             size="small"
           />
         </div>
+
         <el-menu
           :collapse="isCollapsed"
           router
@@ -80,7 +83,7 @@ const logout = () => {
 </script>
 
 <style scoped>
-/* 新增外层容器样式 */
+/* 外层容器 */
 .app-container {
   display: flex;
   flex-direction: column; /* 布局从上到下 */
@@ -88,31 +91,29 @@ const logout = () => {
   overflow: hidden; /* 防止内容超出 */
 }
 
-/* 修改状态栏样式 */
+/* 状态栏样式 */
 .header {
-  position: fixed; /* 固定定位 */
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1000; /* 确保状态栏在最上层 */
   display: flex;
-  justify-content: center; /* 标题居中 */
-  align-items: center;
+  justify-content: space-between; /* 左右对齐 */
+  align-items: center; /* 垂直居中 */
   padding: 10px 20px;
   background: #ffffff;
   border-bottom: 1px solid #ebeef5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); /* 更柔和的阴影效果 */
   height: 60px; /* 固定高度 */
+  z-index: 1000; /* 保证状态栏在最上层 */
+  position: relative; /* 确保 logo 和标题的定位基于这个容器 */
+  border-radius: 8px 8px 0 0; /* 上边角圆角效果 */
 }
 
 /* logo + 标题容器 */
 .header-left {
+  display: flex;
+  align-items: center;
   position: absolute; /* logo和标题使用绝对定位 */
   left: 16px; /* 距离左侧 16px */
   top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
+  transform: translateY(-50%); /* 垂直居中 */
 }
 
 /* logo 样式 */
@@ -156,27 +157,67 @@ const logout = () => {
 /* 内容容器 */
 .content-container {
   display: flex;
-  flex: 1;
-  margin-top: 60px; /* 为顶部状态栏留出空间 */
+  flex: 1; /* 使用flex填充剩余空间 */
   overflow: hidden;
   width: 100%;
-  height: 100%; /* 确保高度填充视口 */
 }
 
 /* 侧边栏 */
 .sidebar {
-  height: 100%; /* 侧边栏填充剩余空间 */
-  width: 240px;
-  overflow-y: auto;
-  transition: width 0.2s;
-  background: #fff;
-  border-right: 1px solid #ebeef5;
   display: flex;
   flex-direction: column;
+  background: #fff;
+  border-right: 1px solid #ebeef5;
+  width: 240px;
+  transition: width 0.2s;
+  padding-top: 60px; /* 给状态栏以下预留空间放按钮 */
+  overflow-y: auto;
+  position: relative; /* 使折叠按钮定位相对于侧边栏 */
+  border-radius: 0 8px 8px 0; /* 右下角圆角效果 */
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1); /* 侧边栏阴影效果 */
 }
 
+/* 侧边栏折叠状态 */
 .sidebar.collapsed {
   width: 64px;
+}
+
+.collapse-btn-wrapper {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 100;
+}
+
+/* 当侧边栏折叠时，折叠按钮显示右箭头 */
+.sidebar.collapsed .collapse-btn-wrapper {
+  left: auto;
+  right: 10px; /* 折叠时移动到右侧 */
+}
+
+/* 初始状态下按钮图标是左箭头 */
+.el-button .el-icon-s-unfold {
+  transform: rotate(0deg); /* 向左箭头 */
+}
+
+/* 折叠状态下按钮图标是右箭头 */
+.sidebar.collapsed .el-button .el-icon-s-unfold {
+  transform: rotate(180deg); /* 向右箭头 */
+}
+/* 确保按钮背景透明，避免按钮遮挡图标 */
+.el-button {
+  background: transparent !important; /* 强制按钮背景透明 */
+  /* border: none; 去掉按钮边框 */
+  position: relative;
+}
+
+/* 为按钮图标添加合适的层级 */
+.el-button .el-icon {
+  z-index: 10; /* 确保图标位于按钮上层 */
+  color: #409eff; /* 设置为蓝色 */
 }
 
 /* 修改主内容区样式 */

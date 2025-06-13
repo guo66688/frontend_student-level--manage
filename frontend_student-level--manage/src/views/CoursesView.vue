@@ -3,11 +3,7 @@
   <el-page-header content="课程管理" />
 
   <!-- 新增课程按钮 -->
-  <el-button
-    type="primary"
-    @click="openAddDialog"
-    class="add-course-button"
-  >
+  <el-button type="primary" @click="openAddDialog" class="add-course-button">
     新 增 课 程
   </el-button>
 
@@ -105,7 +101,9 @@ const formRules = reactive({
 // 拉取课程列表
 async function fetchCourses(page: number = 1) {
   try {
-    const res = await axios.get<{ data: Course[], total: number }>('/courses', { params: { page, size: pageSize.value } })
+    const res = await axios.get<{ data: Course[]; total: number }>('/courses', {
+      params: { page, size: pageSize.value },
+    })
     courses.value = res.data.data
     totalCourses.value = res.data.total
   } catch {
@@ -170,7 +168,6 @@ const handleClose = () => {
 
 onMounted(() => fetchCourses(currentPage.value))
 </script>
-
 
 <style scoped>
 /* 主区的间距和布局 */
