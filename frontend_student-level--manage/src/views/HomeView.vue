@@ -111,16 +111,41 @@ onMounted(async () => {
   // 动态更新饼图配置
   passRateOptions.value = {
     tooltip: { trigger: 'item' },
-    legend: { bottom: 0, left: 'center' },
+    legend: {
+      bottom: 0,
+      left: 'center',
+      orient: 'horizontal', // 图例水平排列
+      itemWidth: 30, // 每个图例项的宽度
+      itemHeight: 10, // 每个图例项的高度
+      textStyle: {
+        fontSize: 12,
+      },
+    },
     series: [
       {
         name: '通过率',
         type: 'pie',
         radius: ['40%', '70%'],
         data: pass.map((item) => ({
-          name: `课程 ${item.course_id}`, // 使用课程ID作为名称
-          value: item.rate, // 使用课程的通过率
+          name: `课程 ${item.course_id}`,
+          value: item.rate,
         })),
+        label: {
+          show: true,
+          position: 'outside', // 标签显示在外部
+          formatter: '{b}', // 只显示课程名称
+          textStyle: {
+            fontSize: 12, // 调整文字大小
+            fontWeight: 'bold',
+          },
+          distance: 10, // 设置标签距离图形的距离
+          overflow: 'truncate', // 防止标签超出
+        },
+        labelLine: {
+          show: true, // 显示指向标签的线
+          length: 15, // 增加指向线的长度
+        },
+        minAngle: 10, // 确保小区块的标签也能显示
       },
     ],
   }
@@ -190,33 +215,31 @@ onMounted(async () => {
 }
 
 .charts {
-  display: flex;
-  gap: 20px;
-  justify-content: space-between;
+  display: flex; /* 使用flex布局 */
+  gap: 20px; /* 图表之间的间距 */
+  justify-content: space-between; /* 确保图表占满可用空间 */
   margin-bottom: 32px;
-  width: 100%;
+  width: 100%; /* 保证图表区的宽度占满 */
+  flex-wrap: wrap; /* 让元素在空间不足时换行 */
 }
 
-.chart-large {
-  background: rgb(248, 245, 245);
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  flex: 2;
-  height: 360px;
-  min-width: 320px;
-  width: 100%;
+.chart-container {
+  display: flex; /* 使用flex布局 */
+  gap: 20px; /* 图表之间的间距 */
+  justify-content: space-between; /* 确保图表占满可用空间 */
+  width: 100%; /* 确保容器占满父容器 */
+  flex-wrap: wrap; /* 让元素在空间不足时换行 */
 }
 
+.chart-large,
 .chart-small {
   background: rgb(248, 245, 245);
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  flex: 1;
-  height: 360px;
-  min-width: 320px;
-  width: 100%;
+  height: 360px; /* 设置固定高度 */
+  min-width: 395px; /* 设置最小宽度，保证图表不被压缩 */
+  /* width: 48%; 让两个图表占据父容器的一半宽度 */
 }
 
 .rank {
@@ -239,11 +262,7 @@ onMounted(async () => {
 
 @media (max-width: 992px) {
   .charts {
-    grid-template-columns: 1fr;
-  }
-
-  .chart-container {
-    flex-direction: column;
+    flex-direction: column; /* 让图表在小屏幕上纵向排列 */
   }
 }
 
