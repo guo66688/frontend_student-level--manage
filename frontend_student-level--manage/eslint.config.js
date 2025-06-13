@@ -104,4 +104,20 @@ export default [
   {
     ignores: ['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/node_modules/**'],
   },
+
+  // Prettier 配合配置
+  {
+    rules: {
+      'prettier/prettier': [
+        'error',
+        {
+          semi: false,
+          singleQuote: true,
+          printWidth: 100,
+          trailingComma: 'es5',
+          endOfLine: 'auto',
+        },
+      ],
+    },
+  },
 ]

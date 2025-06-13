@@ -20,7 +20,7 @@ axios.defaults.baseURL = '/api'
 axios.defaults.withCredentials = true
 
 // 3. 如果是 JWT 认证，从 localStorage 中取 token 并加到每个请求头
-axios.interceptors.request.use(config => {
+axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token')
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`

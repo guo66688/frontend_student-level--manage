@@ -29,7 +29,7 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     // 其他路由...
-  ]
+  ],
 })
 
 export default router
