@@ -1,74 +1,38 @@
-<!-- src\views\HomeView.vue -->
+<!-- src/views/HomeView.vue -->
 <template>
-  <div class="layout">
-    <!-- 可折叠侧栏 -->
-    <aside class="sidebar" :class="{ collapsed: isCollapsed }">
-      <div class="collapse-btn">
-        <el-button
-          :icon="isCollapsed ? 'el-icon-s-unfold' : 'el-icon-s-fold'"
-          @click="isCollapsed = !isCollapsed"
-          circle
-          size="small"
-        />
+  <div class="main-content">
+    <!-- 1. 统计卡片 -->
+    <section class="stats">
+      <div v-for="card in stats" :key="card.title" class="stat-item">
+        <div class="stat-title">{{ card.title }}</div>
+        <div class="stat-value">{{ card.value }}</div>
       </div>
-      <el-menu
-        :collapse="isCollapsed"
-        router
-        :default-active="route.path"
-        background-color="#fff"
-        text-color="#303133"
-        active-text-color="#409EFF"
-        unique-opened
-      >
-        <el-menu-item index="/home"> <i class="el-icon-s-home" /><span>首页</span> </el-menu-item>
-        <el-menu-item index="/students">
-          <i class="el-icon-user" /><span>学生管理</span>
-        </el-menu-item>
-        <el-menu-item index="/courses">
-          <i class="el-icon-notebook-1" /><span>课程管理</span>
-        </el-menu-item>
-        <el-menu-item index="/scores">
-          <i class="el-icon-document" /><span>成绩管理</span>
-        </el-menu-item>
-        <el-menu-item index="/analysis">
-          <i class="el-icon-data-analysis" /><span>统计分析</span>
-        </el-menu-item>
-      </el-menu>
-    </aside>
+    </section>
 
-    <!-- 主区：flex:1 自动占满剩余 -->
-    <main class="main-content">
-      <!-- 1. 统计卡片 -->
-      <section class="stats">
-        <div v-for="card in stats" :key="card.title" class="stat-item">
-          <div class="stat-title">{{ card.title }}</div>
-          <div class="stat-value">{{ card.value }}</div>
-        </div>
-      </section>
-      <!-- 2. 图表区 -->
-      <section class="charts">
-        <div class="chart-container">
-          <div class="chart-large" ref="chartLargeRef"></div>
-          <!-- 折线图容器 -->
-          <div class="chart-small" ref="chartSmallRef"></div>
-          <!-- 饼图容器 -->
-        </div>
-      </section>
-      <!-- 3. 排行榜 -->
-      <section class="rank">
-        <h3>成绩排行榜（前 10 名）</h3>
-        <el-table :data="rankList" stripe size="small">
-          <el-table-column prop="student_name" label="姓名" />
-          <el-table-column prop="avg_score" label="平均分" />
-        </el-table>
-      </section>
-    </main>
+    <!-- 2. 图表区 -->
+    <section class="charts">
+      <div class="chart-container">
+        <div class="chart-large" ref="chartLargeRef"></div>
+        <!-- 折线图容器 -->
+        <div class="chart-small" ref="chartSmallRef"></div>
+        <!-- 饼图容器 -->
+      </div>
+    </section>
+
+    <!-- 3. 排行榜 -->
+    <section class="rank">
+      <h3>成绩排行榜（前 10 名）</h3>
+      <el-table :data="rankList" stripe size="small">
+        <el-table-column prop="student_name" label="姓名" />
+        <el-table-column prop="avg_score" label="平均分" />
+      </el-table>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, shallowRef, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
+// import { useRoute } from 'vue-router'
 import * as echarts from 'echarts'
 import { use } from 'echarts/core'
 import {
@@ -90,8 +54,8 @@ use([
   CanvasRenderer,
 ])
 
-const route = useRoute()
-const isCollapsed = ref(false)
+// const route = useRoute()
+// const isCollapsed = ref(false)
 
 import { getDashboardStats, getScoreTrend, getPassRate, getRankList } from '@/api/analytics'
 import type { DashboardStats, ScoreTrendItem, PassRateItem, RankItem } from '@/api/analytics'
@@ -111,9 +75,8 @@ const scoreTrendOptions = shallowRef({}) // 浅层响应式
 const passRateOptions = shallowRef({})
 const rankList = ref<RankItem[]>([])
 
-// 使用 ECharts 实例类型
-const chartLargeRef = ref<echarts.ECharts | null>(null)
-const chartSmallRef = ref<echarts.ECharts | null>(null)
+const chartLargeRef = ref<HTMLElement | null>(null)
+const chartSmallRef = ref<HTMLElement | null>(null)
 
 onMounted(async () => {
   const statRes: DashboardStats = await getDashboardStats()
@@ -125,8 +88,6 @@ onMounted(async () => {
   ]
 
   const trend: ScoreTrendItem[] = await getScoreTrend()
-  console.log('拿到趋势数据：', trend)
-
   scoreTrendOptions.value = {
     title: { text: '月度平均成绩趋势', left: 'center' },
     tooltip: { trigger: 'axis' },
@@ -144,9 +105,10 @@ onMounted(async () => {
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
   }
 
+  // 获取课程通过率
   const pass: PassRateItem[] = await getPassRate()
-  console.log('拿到通过率数据：', pass)
 
+  // 动态更新饼图配置
   passRateOptions.value = {
     tooltip: { trigger: 'item' },
     legend: { bottom: 0, left: 'center' },
@@ -155,28 +117,26 @@ onMounted(async () => {
         name: '通过率',
         type: 'pie',
         radius: ['40%', '70%'],
-        data: [
-          { name: '数学', value: 85 },
-          { name: '语文', value: 90 },
-          { name: '英语', value: 75 },
-        ],
+        data: pass.map((item) => ({
+          name: `课程 ${item.course_id}`, // 使用课程ID作为名称
+          value: item.rate, // 使用课程的通过率
+        })),
       },
     ],
   }
 
   rankList.value = (await getRankList()).slice(0, 10)
-  console.log('scoreTrendOptions:', scoreTrendOptions.value)
-  console.log('passRateOptions:', passRateOptions.value)
 
   nextTick(() => {
+    // 确保图表容器存在后再初始化图表
     if (chartLargeRef.value) {
-      const chartLargeInstance = echarts.init(chartLargeRef.value as HTMLElement)
+      const chartLargeInstance = echarts.init(chartLargeRef.value)
       chartLargeInstance.setOption(scoreTrendOptions.value)
       chartLargeInstance.resize()
     }
 
     if (chartSmallRef.value) {
-      const chartSmallInstance = echarts.init(chartSmallRef.value as HTMLElement)
+      const chartSmallInstance = echarts.init(chartSmallRef.value)
       chartSmallInstance.setOption(passRateOptions.value)
       chartSmallInstance.resize()
     }
@@ -185,40 +145,16 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.layout {
-  display: flex;
-  height: 100%;
-  overflow: hidden; /* 触发BFC布局计算 */
-}
-
-.sidebar {
-  width: 200px;
-  transition: width 0.2s;
-  background: #fff;
-  border-right: 1px solid #ebeef5;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar.collapsed {
-  width: 64px;
-}
-
 .main-content {
-  flex: 1; /* 使其占据剩余空间 */
+  flex: 1;
   background: #f5f7fa;
-  overflow-y: auto;
   padding: 24px;
-  width: 100%; /* 确保它的宽度占满 */
-  min-height: 0;
+  overflow-y: auto;
 }
 
-/* 1. 统计卡片 */
 .stats {
   display: flex;
-  justify-content: space-between; /* 使卡片水平排列 */
-  flex-wrap: wrap; /* 允许卡片换行 */
+  justify-content: space-between;
   gap: 20px;
   margin-bottom: 32px;
 }
@@ -226,14 +162,14 @@ onMounted(async () => {
 .stat-item {
   background: #fff;
   border-radius: 12px;
-  padding: 24px; /* 增加内边距使卡片内容更加分明 */
+  padding: 24px;
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition:
     transform 0.2s,
     box-shadow 0.2s;
-  width: 100%; /* 默认100%的宽度 */
-  max-width: 200px; /* 限制每个卡片的最大宽度 */
+  width: 100%;
+  max-width: 220px;
 }
 
 .stat-item:hover {
@@ -250,49 +186,37 @@ onMounted(async () => {
 .stat-value {
   font-size: 28px;
   font-weight: 600;
-  color: #409eff; /* 卡片中的数字颜色 */
+  color: #409eff;
 }
 
-/* 图表区 */
 .charts {
   display: flex;
-  gap: 20px; /* 增加图表间距 */
-  justify-content: space-between; /* 保证图表间有足够的空间 */
+  gap: 20px;
+  justify-content: space-between;
   margin-bottom: 32px;
-  width: 100%; /* 保证图表区的宽度占满 */
+  width: 100%;
 }
 
-/* 折线图 */
 .chart-large {
   background: rgb(248, 245, 245);
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  flex: 2; /* 折线图占较大的空间 */
+  flex: 2;
   height: 360px;
-  min-width: 320px; /* 设置最小宽度 */
+  min-width: 320px;
   width: 100%;
-  position: relative;
 }
 
-/* 饼图 */
 .chart-small {
   background: rgb(248, 245, 245);
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  flex: 1; /* 饼图占较小空间 */
+  flex: 1;
   height: 360px;
-  min-width: 320px; /* 设置最小宽度 */
+  min-width: 320px;
   width: 100%;
-  position: relative;
-}
-
-.chart-container {
-  display: flex; /* 使用 flexbox 来排列图表 */
-  gap: 20px; /* 图表之间的间距 */
-  justify-content: space-between; /* 保证图表左右对齐 */
-  flex-wrap: wrap; /* 在容器宽度不足时换行 */
 }
 
 .rank {
@@ -313,7 +237,6 @@ onMounted(async () => {
   padding: 12px 8px;
 }
 
-/* 响应式布局 */
 @media (max-width: 992px) {
   .charts {
     grid-template-columns: 1fr;
