@@ -4,6 +4,10 @@
     <!-- 1. 统计卡片 -->
     <section class="stats">
       <div v-for="card in stats" :key="card.title" class="stat-item">
+        <!-- <div class="stat-icon"> -->
+        <!-- 这里可以替换为你自己的图标 -->
+        <!-- <i :class="card.icon"></i> 
+        </div> -->
         <div class="stat-title">{{ card.title }}</div>
         <div class="stat-value">{{ card.value }}</div>
       </div>
@@ -70,6 +74,12 @@ const stats = ref<StatCard[]>([
   { title: '总班级数', value: 0 },
   { title: '平均成绩', value: 0 },
 ])
+// const stats = ref<StatCard[]>([
+//   { title: '总学生数', value: 0, icon: 'el-icon-user' },  // 这里添加了 icon 字段
+//   { title: '总课程数', value: 0, icon: 'el-icon-book' },
+//   { title: '总班级数', value: 0, icon: 'el-icon-school' },
+//   { title: '平均成绩', value: 0, icon: 'el-icon-pie-chart' }
+// ])
 
 const scoreTrendOptions = shallowRef({}) // 浅层响应式
 const passRateOptions = shallowRef({})
@@ -104,7 +114,6 @@ onMounted(async () => {
     ],
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
   }
-
   // 获取课程通过率
   const pass: PassRateItem[] = await getPassRate()
 
@@ -153,17 +162,33 @@ onMounted(async () => {
   rankList.value = (await getRankList()).slice(0, 10)
 
   nextTick(() => {
-    // 确保图表容器存在后再初始化图表
-    if (chartLargeRef.value) {
-      const chartLargeInstance = echarts.init(chartLargeRef.value)
+    const largeEl = chartLargeRef.value
+    if (largeEl) {
+      const chartLargeInstance = echarts.init(largeEl)
       chartLargeInstance.setOption(scoreTrendOptions.value)
       chartLargeInstance.resize()
+
+      // 添加渐显和缩放效果
+      largeEl.style.opacity = '0'
+      largeEl.style.transform = 'scale(0.8)'
+      setTimeout(() => {
+        largeEl.style.opacity = '1'
+        largeEl.style.transform = 'scale(1)'
+      }, 100)
     }
 
-    if (chartSmallRef.value) {
-      const chartSmallInstance = echarts.init(chartSmallRef.value)
+    const smallEl = chartSmallRef.value
+    if (smallEl) {
+      const chartSmallInstance = echarts.init(smallEl)
       chartSmallInstance.setOption(passRateOptions.value)
       chartSmallInstance.resize()
+
+      smallEl.style.opacity = '0'
+      smallEl.style.transform = 'scale(0.8)'
+      setTimeout(() => {
+        smallEl.style.opacity = '1'
+        smallEl.style.transform = 'scale(1)'
+      }, 100)
     }
   })
 })
@@ -173,17 +198,20 @@ onMounted(async () => {
 .main-content {
   flex: 1;
   background: #f5f7fa;
-  padding: 24px;
+  padding: 15px;
   overflow-y: auto;
 }
 
+/* 统计卡片容器 */
 .stats {
   display: flex;
   justify-content: space-between;
   gap: 20px;
   margin-bottom: 32px;
+  flex-wrap: wrap; /* 统计卡片可以换行 */
 }
 
+/* 每个统计卡片 */
 .stat-item {
   background: #fff;
   border-radius: 12px;
@@ -192,14 +220,16 @@ onMounted(async () => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition:
     transform 0.2s,
-    box-shadow 0.2s;
+    box-shadow 0.2s; /* 添加过渡效果 */
   width: 100%;
   max-width: 220px;
+  flex: 1 1 calc(33% - 20px); /* 在大屏上三列排列 */
+  cursor: pointer; /* 添加点击指针 */
 }
 
 .stat-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px); /* 悬停时的位移效果 */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* 增加阴影 */
 }
 
 .stat-title {
@@ -219,18 +249,20 @@ onMounted(async () => {
   gap: 20px; /* 图表之间的间距 */
   justify-content: space-between; /* 确保图表占满可用空间 */
   margin-bottom: 32px;
-  width: 100%; /* 保证图表区的宽度占满 */
-  flex-wrap: wrap; /* 让元素在空间不足时换行 */
+  width: 100%;
+  flex-wrap: wrap; /* 图表区域可以换行 */
 }
-
+/* 图表区域容器 */
 .chart-container {
   display: flex; /* 使用flex布局 */
   gap: 20px; /* 图表之间的间距 */
   justify-content: space-between; /* 确保图表占满可用空间 */
   width: 100%; /* 确保容器占满父容器 */
   flex-wrap: wrap; /* 让元素在空间不足时换行 */
+  box-sizing: border-box;
 }
 
+/* 图表容器（大图和小图） */
 .chart-large,
 .chart-small {
   background: rgb(248, 245, 245);
@@ -239,7 +271,12 @@ onMounted(async () => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   height: 360px; /* 设置固定高度 */
   min-width: 395px; /* 设置最小宽度，保证图表不被压缩 */
-  /* width: 48%; 让两个图表占据父容器的一半宽度 */
+  flex: 1 1 calc(50% - 20px); /* 大屏时两个图表占据50%宽度 */
+  transition:
+    transform 0.3s ease,
+    opacity 0.5s ease; /* 添加过渡效果 */
+  opacity: 0; /* 初始时隐藏，待加载完再显示 */
+  transform: scale(0.8); /* 初始缩小 */
 }
 
 .rank {
@@ -260,19 +297,26 @@ onMounted(async () => {
   padding: 12px 8px;
 }
 
+/* 小屏幕时图表纵向排列 */
 @media (max-width: 992px) {
-  .charts {
+  .chart-container {
     flex-direction: column; /* 让图表在小屏幕上纵向排列 */
+  }
+
+  .chart-large,
+  .chart-small {
+    min-width: 100%; /* 确保图表占满宽度 */
+    flex: 1 1 100%; /* 在小屏幕下每个图表占满一行 */
   }
 }
 
 @media (max-width: 768px) {
   .stats {
-    grid-template-columns: 1fr;
+    flex-direction: column; /* 让统计卡片在小屏幕上纵向排列 */
   }
 
   .stat-item {
-    margin-bottom: 16px;
+    margin-bottom: 16px; /* 增加卡片之间的间距 */
   }
 }
 </style>
