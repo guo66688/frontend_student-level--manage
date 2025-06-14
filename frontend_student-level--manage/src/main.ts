@@ -1,3 +1,4 @@
+// src\main.ts
 import { createApp } from 'vue'
 import App from './App.vue'
 
@@ -9,10 +10,12 @@ import 'element-plus/dist/index.css'
 
 import './assets/main.css'
 
-import * as ElIcons from '@element-plus/icons-vue'
-console.log(ElIcons)
+// 引入 Element Plus 的图标库
+import * as ElIcons from '@element-plus/icons-vue' // 批量导入所有图标
+console.log(ElIcons) // 你可以检查在控制台输出所有导入的图标
+
 import axios from 'axios'
-import { Expand, Fold } from '@element-plus/icons-vue'
+
 // 引入 vue-echarts 和 ECharts
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
@@ -47,11 +50,17 @@ axios.interceptors.request.use((config) => {
 })
 
 const app = createApp(App)
+
 // 注册 VChart 组件
 app.component('v-chart', VChart)
-// 导入图标组件
-app.component('ElIconSUnfold', Fold) // 注册左箭头图标
-app.component('ElIconSFold', Expand) // 注册右箭头图标
+
+// 通过解构从 ElIcons 导入你需要的图标
+const { Fold, Expand } = ElIcons
+
+// 注册图标组件
+app.component('ElIconSUnfold', Fold) // 左箭头
+app.component('ElIconSFold', Expand) // 右箭头
+
 // 将 axios 挂载到全局属性中
 app.config.globalProperties.$axios = axios
 

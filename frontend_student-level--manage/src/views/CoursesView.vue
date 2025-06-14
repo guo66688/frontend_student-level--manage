@@ -40,7 +40,7 @@
   <!-- 新增/编辑对话框 -->
   <el-dialog
     :title="isEditing ? '编辑课程' : '新增课程'"
-    v-model:visible="dialogVisible"
+    v-model="dialogVisible"
     width="500px"
     :before-close="handleClose"
   >
@@ -66,6 +66,13 @@
 import axios from 'axios'
 import { ref, onMounted, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { nextTick } from 'vue'
+import { ElDialog, ElButton, ElForm, ElFormItem, ElInput, ElInputNumber } from 'element-plus'
+
+// 使用 import type 来避免与局部声明冲突
+import type { FormItemRule } from 'element-plus'
+
+type Arrayable<T> = T | T[]
 
 // 全局设置 axios 请求基础路径
 axios.defaults.baseURL = '/api'
@@ -88,13 +95,13 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const totalCourses = ref(0)
 
-// 表单验证规则
-const formRules = reactive({
+// 显式声明 formRules 类型，使用 element-plus 中的 FormItemRule 类型
+const formRules: Partial<Record<string, Arrayable<FormItemRule>>> = reactive({
   course_code: [{ required: true, message: '课程代码不能为空', trigger: 'blur' }],
   course_name: [{ required: true, message: '课程名称不能为空', trigger: 'blur' }],
   credit: [
     { required: true, message: '学分不能为空', trigger: 'blur' },
-    { type: 'number', message: '学分必须是数字', trigger: 'blur' },
+    { required: true, type: 'number', message: '学分必须是数字', trigger: 'blur' },
   ],
 })
 
@@ -113,16 +120,23 @@ async function fetchCourses(page: number = 1) {
 
 // 打开“新增”对话框
 function openAddDialog() {
+  if (dialogVisible.value) return
   isEditing.value = false
   form.value = {}
   dialogVisible.value = true
+  nextTick(() => {
+    console.log('对话框已显示')
+  })
 }
 
 // 打开“编辑”对话框
 function openEditDialog(row: Course) {
+  console.log('打开编辑对话框', row)
+  if (dialogVisible.value) return
   isEditing.value = true
   form.value = { ...row }
   dialogVisible.value = true
+  console.log('对话框显示状态', dialogVisible.value) // 调试输出
 }
 
 // 提交新增或更新
@@ -145,6 +159,7 @@ async function submitForm() {
 
 // 删除课程
 async function deleteCourse(id: number) {
+  console.log('删除课程', id)
   try {
     await ElMessageBox.confirm('确认删除该课程？', '警告', { type: 'warning' })
     await axios.delete(`/courses/${id}`)
@@ -212,10 +227,12 @@ onMounted(() => fetchCourses(currentPage.value))
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* 对话框样式优化 */
 .el-dialog {
-  border-radius: 8px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* 确保对话框居中 */
+  z-index: 9999;
 }
 
 .el-form-item {
