@@ -10,7 +10,7 @@
     placeholder="搜索课程"
     class="courses-search"
     prefix-icon="el-icon-search"
-    @input="searchCourses"
+    @keyup.enter="searchCourses"
   />
   <!-- </div> -->
 
@@ -34,7 +34,7 @@
 
   <!-- 分页组件 -->
   <el-pagination
-    :current-page="currentPage"
+    v-bind:current-page="currentPage"
     :page-size="pageSize"
     :total="totalCourses"
     @current-change="handlePageChange"
@@ -179,6 +179,7 @@ async function deleteCourse(id: number) {
 }
 
 function handlePageChange(page: number) {
+  currentPage.value = page
   fetchCourses(page, searchQuery.value)
 }
 
@@ -254,6 +255,38 @@ onMounted(() => {
   margin: 0 8px; /* 按钮和输入框之间增加间距 */
 }
 
+/* 表格与搜索框之间的间距 */
+.el-table {
+  margin-top: 20px; /* 给表格增加顶部外边距，使其与搜索框有更多间隔 */
+}
+:deep(.el-table th) {
+  background-color: var(--color-panel) !important; /* 表头背景色 */
+  color: var(--color-text) !important; /* 表头文本颜色 */
+  font-weight: bold !important; /* 表头字体加粗 */
+}
+
+:deep.el-table__row--striped {
+  background-color: unset !important; /* 禁用条纹效果 */
+}
+
+::v-deep .el-table td {
+  background-color: var(--color-card) !important; /* 单元格背景色 */
+  color: inherit !important; /* 继承父级的文本颜色 */
+}
+/* 自定义奇偶行样式 */
+::v-deep .el-table__body tr:nth-child(odd) {
+  background-color: var(--color-background-odd) !important;
+}
+
+::v-deep .el-table__body tr:nth-child(even) {
+  background-color: var(--color-background-even) !important;
+}
+
+:deep(.el-table .el-table__body tr:hover) {
+  background-color: var(--color-hover) !important;
+  cursor: pointer !important;
+}
+
 /* 使用 ::v-deep 来穿透 scoped 样式 */
 ::v-deep .el-dialog {
   position: fixed !important;
@@ -308,37 +341,5 @@ onMounted(() => {
 
 ::v-deep .el-button--text:hover {
   color: #409eff !important;
-}
-
-/* 表格与搜索框之间的间距 */
-.el-table {
-  margin-top: 20px; /* 给表格增加顶部外边距，使其与搜索框有更多间隔 */
-}
-:deep(.el-table th) {
-  background-color: var(--color-panel) !important; /* 表头背景色 */
-  color: var(--color-text) !important; /* 表头文本颜色 */
-  font-weight: bold !important; /* 表头字体加粗 */
-}
-
-:deep.el-table__row--striped {
-  background-color: unset !important; /* 禁用条纹效果 */
-}
-
-::v-deep .el-table td {
-  background-color: var(--color-card) !important; /* 单元格背景色 */
-  color: inherit !important; /* 继承父级的文本颜色 */
-}
-/* 自定义奇偶行样式 */
-::v-deep .el-table__body tr:nth-child(odd) {
-  background-color: var(--color-background-odd) !important;
-}
-
-::v-deep .el-table__body tr:nth-child(even) {
-  background-color: var(--color-background-even) !important;
-}
-
-:deep(.el-table .el-table__body tr:hover) {
-  background-color: var(--color-hover) !important;
-  cursor: pointer !important;
 }
 </style>

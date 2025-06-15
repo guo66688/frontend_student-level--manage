@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import CoursesView from '../views/CoursesView.vue'
+import StudentsView from '../views/StudentsView.vue' // 导入 StudentsView
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +27,12 @@ const router = createRouter({
       path: '/courses',
       name: 'Courses',
       component: CoursesView, // 使用全局布局
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/students', // 新增 Students 路由
+      name: 'Students',
+      component: StudentsView,
       meta: { requiresAuth: true },
     },
     // 其他路由...
