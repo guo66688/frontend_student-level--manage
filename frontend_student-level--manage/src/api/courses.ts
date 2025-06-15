@@ -12,10 +12,13 @@ export interface Course {
 // 获取课程列表
 export function getCourses(
   page: number = 1,
-  size: number = 10
+  size: number = 10,
+  query: string = '' // 添加 query 参数
 ): Promise<{ data: Course[]; total: number }> {
   return request
-    .get<{ data: Course[]; total: number }>('/api/courses', { params: { page, size } })
+    .get<{ data: Course[]; total: number }>('/api/courses', {
+      params: { page, size, query }, // 将 query 添加到请求参数中
+    })
     .then((response) => {
       // 确保返回的结构始终是 { data: Course[], total: number }
       // response.data 直接是我们需要的结构，避免类型不匹配

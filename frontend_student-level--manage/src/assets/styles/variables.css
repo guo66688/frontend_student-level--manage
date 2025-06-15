@@ -86,9 +86,6 @@ body.light {
   --dark-color-heading: #f2f6ff; /* 标题文字：亮色 */
   --dark-color-subtext: #a8aec9; /* 次要文字：清晰的颜色 */
 
-  --color-background-odd: #495d89; /* 偶数行背景色：深蓝色 */
-  --color-background-even: #5e6b99; /* 奇数行背景色：浅蓝色 */
-
   --color-hover: #27b6e2; /* 悬停背景色：亮蓝色 */
 }
 

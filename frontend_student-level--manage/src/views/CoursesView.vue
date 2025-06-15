@@ -1,31 +1,36 @@
-<!-- src/views/CoursesView.vue -->
+<!-- src\views\CoursesView.vue -->
 <template>
-  <el-page-header content="课程管理" />
+  <!-- <div :class="['courses-header', theme]"> -->
+  <!-- 课程管理标题 -->
+  <h2 class="courses-title">课程管理</h2>
+
+  <!-- 搜索框 -->
+  <el-input
+    v-model="searchQuery"
+    placeholder="搜索课程"
+    class="courses-search"
+    prefix-icon="el-icon-search"
+    @input="searchCourses"
+  />
+  <!-- </div> -->
 
   <!-- 新增课程按钮 -->
   <el-button type="primary" @click="openAddDialog" class="add-course-button">
     新 增 课 程
   </el-button>
-
-  <!-- 表格部分 -->
-  <el-table :data="courses" style="width: 100%; margin-top: 20px; border-radius: 8px" stripe>
-    <el-table-column prop="course_code" label="课程代码" sortable align="center" />
-    <el-table-column prop="course_name" label="课程名称" sortable align="center" />
-    <el-table-column prop="credit" label="学 分" sortable align="center" />
-    <el-table-column label="操作" align="center">
-      <template #default="{ row }">
-        <!-- 修改 size="mini" 为 size="small" -->
-        <el-button
-          size="small"
-          @click="openEditDialog(row)"
-          type="primary"
-          style="margin-right: 8px"
-          >编辑</el-button
-        >
-        <el-button size="small" type="danger" @click="deleteCourse(row.id)">删除</el-button>
-      </template>
-    </el-table-column>
-  </el-table>
+  <div :class="['courses-header', theme]">
+    <el-table :data="courses" stripe>
+      <el-table-column prop="course_code" label="课程代码" sortable align="center" />
+      <el-table-column prop="course_name" label="课程名称" sortable align="center" />
+      <el-table-column prop="credit" label="学 分" sortable align="center" />
+      <el-table-column label="操作" align="center">
+        <template #default="{ row, column, $index }">
+          <el-button size="small" @click="openEditDialog(row)" type="primary">编辑</el-button>
+          <el-button size="small" type="danger" @click="deleteCourse(row.id)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </div>
 
   <!-- 分页组件 -->
   <el-pagination
@@ -39,6 +44,7 @@
 
   <!-- 新增/编辑对话框 -->
   <el-dialog
+    class="custom-dialog"
     :title="isEditing ? '编辑课程' : '新增课程'"
     v-model="dialogVisible"
     width="500px"
@@ -64,17 +70,14 @@
 
 <script setup lang="ts">
 import axios from 'axios'
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, reactive, computed, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { nextTick } from 'vue'
-import { ElDialog, ElButton, ElForm, ElFormItem, ElInput, ElInputNumber } from 'element-plus'
 
 // 使用 import type 来避免与局部声明冲突
 import type { FormItemRule } from 'element-plus'
 
 type Arrayable<T> = T | T[]
 
-// 全局设置 axios 请求基础路径
 axios.defaults.baseURL = '/api'
 
 interface Course {
@@ -90,12 +93,10 @@ const isEditing = ref(false)
 const form = ref<Partial<Course>>({})
 const formRef = ref<any>(null)
 
-// 分页相关
 const currentPage = ref(1)
 const pageSize = ref(10)
 const totalCourses = ref(0)
 
-// 显式声明 formRules 类型，使用 element-plus 中的 FormItemRule 类型
 const formRules: Partial<Record<string, Arrayable<FormItemRule>>> = reactive({
   course_code: [{ required: true, message: '课程代码不能为空', trigger: 'blur' }],
   course_name: [{ required: true, message: '课程名称不能为空', trigger: 'blur' }],
@@ -105,11 +106,21 @@ const formRules: Partial<Record<string, Arrayable<FormItemRule>>> = reactive({
   ],
 })
 
-// 拉取课程列表
-async function fetchCourses(page: number = 1) {
+const searchQuery = ref('')
+
+// 获取当前主题
+const theme = computed(() => {
+  const currentTheme = document.body.classList.contains('dark') ? 'dark' : 'light'
+  console.log('当前主题:', currentTheme)
+  // 使用 nextTick 确保 DOM 更新完毕
+  return currentTheme
+})
+
+// 拉取课程列表并根据搜索过滤
+async function fetchCourses(page: number = 1, query: string = '') {
   try {
     const res = await axios.get<{ data: Course[]; total: number }>('/courses', {
-      params: { page, size: pageSize.value },
+      params: { page, size: pageSize.value, query },
     })
     courses.value = res.data.data
     totalCourses.value = res.data.total
@@ -118,28 +129,27 @@ async function fetchCourses(page: number = 1) {
   }
 }
 
+// 搜索课程并触发过滤
+function searchCourses() {
+  fetchCourses(currentPage.value, searchQuery.value) // 传递搜索关键词
+}
+
 // 打开“新增”对话框
 function openAddDialog() {
   if (dialogVisible.value) return
   isEditing.value = false
   form.value = {}
   dialogVisible.value = true
-  nextTick(() => {
-    console.log('对话框已显示')
-  })
 }
 
 // 打开“编辑”对话框
 function openEditDialog(row: Course) {
-  console.log('打开编辑对话框', row)
   if (dialogVisible.value) return
   isEditing.value = true
   form.value = { ...row }
   dialogVisible.value = true
-  console.log('对话框显示状态', dialogVisible.value) // 调试输出
 }
 
-// 提交新增或更新
 async function submitForm() {
   try {
     await formRef.value.validate()
@@ -157,9 +167,7 @@ async function submitForm() {
   }
 }
 
-// 删除课程
 async function deleteCourse(id: number) {
-  console.log('删除课程', id)
   try {
     await ElMessageBox.confirm('确认删除该课程？', '警告', { type: 'warning' })
     await axios.delete(`/courses/${id}`)
@@ -170,118 +178,167 @@ async function deleteCourse(id: number) {
   }
 }
 
-// 页码变更时触发
 function handlePageChange(page: number) {
-  currentPage.value = page
-  fetchCourses(page)
+  fetchCourses(page, searchQuery.value)
 }
 
-// 关闭对话框时触发
 const handleClose = () => {
-  dialogVisible.value = false // 关闭对话框
+  dialogVisible.value = false
 }
 
-onMounted(() => fetchCourses(currentPage.value))
+onMounted(() => {
+  fetchCourses(currentPage.value) // 加载数据
+  nextTick(() => {
+    // 确保数据加载完成后，强制应用样式
+    const tableElement = document.querySelector('.el-table')
+    if (tableElement && tableElement instanceof HTMLElement) {
+      tableElement.style.display = 'none' // 隐藏表格
+      tableElement.offsetHeight // 强制触发重新渲染
+      tableElement.style.display = '' // 恢复显示
+    }
+  })
+})
 </script>
 
 <style scoped>
-/* 主区的间距和布局 */
-.main-content {
-  padding: 24px;
-  background-color: #f5f7fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-}
-.add-course-button {
+/* 课程管理标题 */
+.courses-title {
   margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--color-primary);
+}
+/* 调整搜索框和新增按钮的布局 */
+.courses-header {
+  display: flex;
+  justify-content: space-between; /* 让内容均匀分布 */
+  align-items: center; /* 垂直居中对齐 */
+  gap: 20px; /* 增加间距，让元素之间不再显得过于紧凑 */
+  margin-bottom: 20px; /* 给表格和标题之间留出间距 */
+}
+
+/* 搜索框样式 */
+.courses-search {
+  width: 200px; /* 设置固定宽度，避免过宽 */
+  padding: 5px 8px; /* 给输入框增加内边距 */
+  border-radius: 8px; /* 圆角效果 */
+  border: 1px solid #dcdfe6; /* 边框颜色 */
+}
+
+/* 新增课程按钮样式 */
+.add-course-button {
   background: linear-gradient(45deg, #409eff, #79b8ff);
   border-radius: 8px;
-  padding: 10px 20px;
-  font-size: 16px;
-}
-/* 表格样式优化 */
-.el-table {
-  border-radius: 8px;
-  overflow: hidden;
+  padding: 8px 15px; /* 按钮的内边距更大一些 */
+  font-size: 16px; /* 按钮字体大小适中 */
+  color: #fff; /* 按钮文字颜色 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 按钮的阴影效果 */
+  transition: all 0.3s ease; /* 按钮悬停效果 */
 }
 
-.el-table th {
-  background-color: #f4f6f9;
-  color: #409eff;
+.add-course-button:hover {
+  background: linear-gradient(45deg, #3e8ef7, #66aaff);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* 增加悬停时的阴影 */
+  cursor: pointer; /* 鼠标悬停时显示指针 */
 }
 
-.el-table td {
-  font-size: 14px;
+/* 调整分页器样式 */
+.el-pagination {
+  margin-top: 20px; /* 给分页器留出更多的空间 */
+  justify-content: center; /* 使分页器居中对齐 */
 }
 
-.el-table tr:hover {
-  background-color: #e6f7ff;
+/* 按钮、输入框与页面的整体间距 */
+.el-button,
+.el-input {
+  margin: 0 8px; /* 按钮和输入框之间增加间距 */
 }
 
-.el-button {
-  transition: all 0.3s ease;
+/* 使用 ::v-deep 来穿透 scoped 样式 */
+::v-deep .el-dialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 9999 !important;
+  width: 500px !important;
+  padding: 20px !important;
+  border-radius: 12px !important;
+  background-color: #fff !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
 }
 
-.el-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+/* 弹窗标题 */
+::v-deep .el-dialog__header {
+  font-size: 18px !important;
+  font-weight: bold !important;
+  color: #409eff !important;
+  padding-bottom: 10px !important;
 }
 
-.el-dialog {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%); /* 确保对话框居中 */
-  z-index: 9999;
-}
-
-.el-form-item {
-  margin-bottom: 20px;
-}
-
-.el-input,
-.el-input-number {
-  border-radius: 6px;
-  padding: 10px;
+/* 弹窗内容区样式 */
+::v-deep .el-dialog__body {
+  padding: 20px !important; /* 增加内容区域的间距 */
 }
 
 /* 按钮样式 */
-.el-button[type='primary'] {
-  background-color: #409eff;
-  border-color: #409eff;
+::v-deep .el-button {
+  padding: 12px 20px !important;
+  font-size: 16px !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
 }
 
-.el-button[type='primary']:hover {
-  background-color: #3e8ef7;
-  border-color: #3e8ef7;
+/* 确认按钮 */
+::v-deep .el-button--primary {
+  background-color: #409eff !important;
+  color: #fff !important;
+  border-color: #409eff !important;
 }
 
-.el-button[type='danger'] {
-  background-color: #f56c6c;
-  border-color: #f56c6c;
+::v-deep .el-button--primary:hover {
+  background-color: #66aaff !important;
+  border-color: #66aaff !important;
 }
 
-.el-button[type='danger']:hover {
-  background-color: #f24e4e;
-  border-color: #f24e4e;
+/* 取消按钮 */
+::v-deep .el-button--text {
+  color: #606266 !important;
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .main-content {
-    padding: 16px;
-  }
+::v-deep .el-button--text:hover {
+  color: #409eff !important;
+}
 
-  .el-button {
-    font-size: 14px;
-  }
+/* 表格与搜索框之间的间距 */
+.el-table {
+  margin-top: 20px; /* 给表格增加顶部外边距，使其与搜索框有更多间隔 */
+}
+:deep(.el-table th) {
+  background-color: var(--color-panel) !important; /* 表头背景色 */
+  color: var(--color-text) !important; /* 表头文本颜色 */
+  font-weight: bold !important; /* 表头字体加粗 */
+}
 
-  .el-table {
-    font-size: 12px;
-  }
+:deep.el-table__row--striped {
+  background-color: unset !important; /* 禁用条纹效果 */
+}
 
-  .el-dialog {
-    width: 90%;
-  }
+::v-deep .el-table td {
+  background-color: var(--color-card) !important; /* 单元格背景色 */
+  color: inherit !important; /* 继承父级的文本颜色 */
+}
+/* 自定义奇偶行样式 */
+::v-deep .el-table__body tr:nth-child(odd) {
+  background-color: var(--color-background-odd) !important;
+}
+
+::v-deep .el-table__body tr:nth-child(even) {
+  background-color: var(--color-background-even) !important;
+}
+
+:deep(.el-table .el-table__body tr:hover) {
+  background-color: var(--color-hover) !important;
+  cursor: pointer !important;
 }
 </style>

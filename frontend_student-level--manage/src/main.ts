@@ -1,4 +1,4 @@
-// src\main.ts
+// src/main.ts
 import { createApp } from 'vue'
 import App from './App.vue'
 
@@ -6,9 +6,10 @@ import router from './router'
 import { createPinia } from 'pinia'
 
 import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
-import '@/assets/styles/variables.css'
-import './assets/main.css'
+import 'element-plus/dist/index.css' // 确保 Element Plus 样式优先加载
+import './assets/main.css' // 自定义样式
+
+import '@/assets/styles/variables.css' // 自定义变量样式（如果需要的话）
 
 // 引入 Element Plus 的图标库
 import * as ElIcons from '@element-plus/icons-vue' // 批量导入所有图标
