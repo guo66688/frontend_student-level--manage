@@ -6,6 +6,8 @@
       <div class="header-left">
         <img src="@/assets/logo.png" class="header-logo" />
         <span class="header-title">学生成绩管理系统</span>
+        <ThemeToggle @toggle-theme="toggleTheme" />
+        <!-- 监听主题切换事件 -->
       </div>
       <div class="user-info">
         <el-avatar src="path-to-user-avatar" alt="user-avatar" />
@@ -38,23 +40,30 @@
           :collapse="isCollapsed"
           router
           :default-active="route.path"
-          background-color="#fff"
-          text-color="#303133"
-          active-text-color="#409EFF"
+          background-color="transparent"
+          text-color="var(--color-subtext)"
+          active-text-color="var(--color-primary)"
           unique-opened
         >
-          <el-menu-item index="/home"> <i class="el-icon-s-home" /><span>首页</span> </el-menu-item>
+          <el-menu-item index="/home">
+            <el-icon class="sidebar-icon"><HomeFilled /></el-icon>
+            <span>首页</span>
+          </el-menu-item>
           <el-menu-item index="/students">
-            <i class="el-icon-user" /><span>学生管理</span>
+            <el-icon class="sidebar-icon"><UserFilled /></el-icon>
+            <span>学生管理</span>
           </el-menu-item>
           <el-menu-item index="/courses">
-            <i class="el-icon-notebook-1" /><span>课程管理</span>
+            <el-icon class="sidebar-icon"><Notebook /></el-icon>
+            <span>课程管理</span>
           </el-menu-item>
           <el-menu-item index="/scores">
-            <i class="el-icon-document" /><span>成绩管理</span>
+            <el-icon class="sidebar-icon"><Document /></el-icon>
+            <span>成绩管理</span>
           </el-menu-item>
           <el-menu-item index="/analysis">
-            <i class="el-icon-data-analysis" /><span>统计分析</span>
+            <el-icon class="sidebar-icon"><DataAnalysis /></el-icon>
+            <span>统计分析</span>
           </el-menu-item>
         </el-menu>
       </aside>
@@ -71,6 +80,8 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { ref } from 'vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
+import { HomeFilled, UserFilled, Notebook, Document, DataAnalysis } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const isCollapsed = ref(false)
@@ -80,54 +91,73 @@ const logout = () => {
   localStorage.removeItem('token')
   window.location.href = '/login'
 }
+
+// 切换主题时调用
+const toggleTheme = () => {
+  const newTheme = document.body.classList.contains('dark') ? 'light' : 'dark'
+  document.body.classList.toggle('dark', newTheme === 'dark')
+  updateThemeColors(newTheme)
+  window.location.reload() // 切换主题后刷新页面
+}
+
+// 更新主题颜色
+const updateThemeColors = (theme: 'light' | 'dark') => {
+  if (theme === 'dark') {
+    document.documentElement.style.setProperty('--color-bg', '#25294d')
+    document.documentElement.style.setProperty('--color-text', '#e4e8f3')
+  } else {
+    document.documentElement.style.setProperty('--color-bg', '#ffffff')
+    document.documentElement.style.setProperty('--color-text', '#000000')
+  }
+}
 </script>
 
 <style scoped>
 /* 外层容器 */
 .app-container {
   display: flex;
-  flex-direction: column; /* 布局从上到下 */
-  height: 100vh; /* 使用视口高度，确保页面填满整个视口 */
-  overflow: hidden; /* 防止内容超出 */
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* 状态栏样式 */
 .header {
   display: flex;
-  justify-content: space-between; /* 左右对齐 */
-  align-items: center; /* 垂直居中 */
+  justify-content: space-between;
+  align-items: center;
   padding: 10px 20px;
-  background: #ffffff;
-  border-bottom: 1px solid #ebeef5;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); /* 更柔和的阴影效果 */
-  height: 60px; /* 固定高度 */
-  z-index: 1000; /* 保证状态栏在最上层 */
-  position: relative; /* 确保 logo 和标题的定位基于这个容器 */
-  border-radius: 8px 8px 0 0; /* 上边角圆角效果 */
+  background: var(--color-panel);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  height: 60px;
+  z-index: 1000;
+  position: relative;
+  border-radius: 8px 8px 0 0;
+  color: var(--color-text);
 }
 
-/* logo + 标题容器 */
 .header-left {
   display: flex;
   align-items: center;
-  position: absolute; /* logo和标题使用绝对定位 */
-  left: 16px; /* 距离左侧 16px */
+  position: absolute;
+  left: 16px;
   top: 50%;
-  transform: translateY(-50%); /* 垂直居中 */
+  gap: 12px;
+  transform: translateY(-50%);
 }
 
-/* logo 样式 */
 .header-logo {
   width: 32px;
   height: 32px;
   padding: 4px;
-  background-color: #fff;
+  background-color: var(--color-panel);
   border-radius: 50%;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   margin-right: 8px;
   transition:
     transform 0.3s,
-    box-shadow 0.3s; /* 每个过渡效果独立设置 */
+    box-shadow 0.3s;
 }
 
 .header-logo:hover {
@@ -135,49 +165,110 @@ const logout = () => {
   box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
 }
 
-/* 标题样式 */
 .header-title {
   font-size: 18px;
   font-weight: bold;
-  color: #333;
+  color: var(--color-text);
   letter-spacing: 1px;
 }
 
-/* 右侧用户信息 */
+.header-left :deep(.el-button) {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  transition: all 0.3s ease;
+  color: var(--color-text);
+}
+
+.header-left :deep(.el-button):hover {
+  background-color: var(--color-bg);
+  box-shadow: 0 0 8px rgba(76, 111, 255, 0.15);
+}
+
 .user-info {
   display: flex;
   align-items: center;
-  margin-left: auto; /* 将右侧信息右对齐 */
+  margin-left: auto;
 }
 
 .el-avatar {
-  margin-right: 10px;
+  margin-right: 15px;
 }
 
-/* 内容容器 */
 .content-container {
   display: flex;
-  flex: 1; /* 使用flex填充剩余空间 */
+  flex: 1;
   overflow: hidden;
   width: 100%;
 }
 
-/* 侧边栏 */
 .sidebar {
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-right: 1px solid #ebeef5;
+  background: var(--color-card);
+  border-right: 1px solid var(--color-border);
   width: 240px;
   transition: width 0.2s;
-  padding-top: 60px; /* 给状态栏以下预留空间放按钮 */
+  padding-top: 60px;
   overflow-y: auto;
-  position: relative; /* 使折叠按钮定位相对于侧边栏 */
-  border-radius: 0 8px 8px 0; /* 右下角圆角效果 */
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1); /* 侧边栏阴影效果 */
+  position: relative;
+  align-items: stretch; /* ✅ 让 el-menu 撑满宽度（代替 center） */
+  border-radius: 0 8px 8px 0;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+  color: var(--color-text);
 }
 
-/* 侧边栏折叠状态 */
+.sidebar :deep(.el-menu) {
+  width: 100%; /* ✅ 撑满侧边栏宽度 */
+  box-shadow: none !important; /* ✅ 避免边界残影 */
+  border-right: none !important;
+}
+
+.sidebar :deep(.el-menu-item) {
+  color: var(--color-subtext) !important;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 14px; /* ✅ 统一字号 */
+  padding: 10px 20px; /* 可调 */
+}
+
+.sidebar :deep(.el-menu-item.is-active) {
+  color: var(--color-primary) !important;
+  background-color: transparent !important;
+  font-weight: 600;
+}
+
+.sidebar :deep(.el-menu-item:hover) {
+  background-color: var(--color-panel) !important;
+  color: var(--color-text) !important;
+}
+.sidebar :deep(i.sidebar-icon) {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  background: none;
+  border: none;
+}
+
+.sidebar :deep(.sidebar-icon) {
+  font-size: 18px;
+  margin-right: 8px;
+  color: var(--color-subtext); /* 默认图标色 */
+  transition: color 0.3s ease;
+  vertical-align: middle; /* ✅ 让图标在文字中垂直居中 */
+}
+
+.sidebar :deep(.el-menu-item.is-active .sidebar-icon) {
+  color: var(--color-primary); /* 激活项图标色 */
+}
+
+.sidebar :deep(.el-menu-item:hover .sidebar-icon) {
+  color: var(--color-text); /* 悬停时图标变亮 */
+}
+
 .sidebar.collapsed {
   width: 64px;
 }
@@ -192,44 +283,38 @@ const logout = () => {
   z-index: 100;
 }
 
-/* 当侧边栏折叠时，折叠按钮显示右箭头 */
 .sidebar.collapsed .collapse-btn-wrapper {
   left: auto;
-  right: 10px; /* 折叠时移动到右侧 */
+  right: 10px;
 }
 
-/* 初始状态下按钮图标是左箭头 */
 .el-button .el-icon-s-unfold {
-  transform: rotate(0deg); /* 向左箭头 */
+  transform: rotate(0deg);
 }
 
-/* 折叠状态下按钮图标是右箭头 */
 .sidebar.collapsed .el-button .el-icon-s-unfold {
-  transform: rotate(180deg); /* 向右箭头 */
+  transform: rotate(180deg);
 }
-/* 确保按钮背景透明，避免按钮遮挡图标 */
+
 .el-button {
-  background: transparent !important; /* 强制按钮背景透明 */
-  /* border: none; 去掉按钮边框 */
+  background: transparent !important;
   position: relative;
 }
 
-/* 为按钮图标添加合适的层级 */
 .el-button .el-icon {
-  z-index: 10; /* 确保图标位于按钮上层 */
-  color: #409eff; /* 设置为蓝色 */
+  z-index: 10;
+  color: var(--color-primary);
 }
 
-/* 修改主内容区样式 */
 .main-content {
-  flex: 1; /* 使用flex填充剩余空间 */
+  flex: 1;
   padding: 24px;
   overflow-y: auto;
-  background: #f5f7fa;
-  width: 100%; /* 确保宽度适应剩余空间 */
+  background: var(--color-bg);
+  width: 100%;
+  color: var(--color-text);
 }
 
-/* 响应式调整 */
 @media (max-width: 992px) {
   .content-container {
     flex-direction: column;

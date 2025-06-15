@@ -1,0 +1,101 @@
+/* 🌑 Dark Theme */
+body.dark {
+  /* 暗色主题颜色映射 */
+  --color-primary: var(--dark-color-primary); /* 主色：按钮、图表主线 */
+  --color-accent: var(--dark-color-accent); /* 点缀色：hover、图标、强调 */
+  --color-success: var(--dark-color-success); /* 成功色：及格/通过 */
+  --color-warning: var(--dark-color-warning); /* 警告色 */
+  --color-danger: var(--dark-color-danger); /* 错误色：不及格等 */
+
+  --color-bg: var(--dark-color-bg); /* 页面背景 */
+  --color-panel: var(--dark-color-panel); /* 顶部导航背景 */
+  --color-card: var(--dark-color-card); /* 卡片/侧边栏背景 */
+  --color-text: var(--dark-color-text); /* 正文主字体颜色 */
+  --color-muted: var(--dark-color-muted); /* 次文字颜色 */
+  --color-border: var(--dark-color-border); /* 边框线 */
+
+  --color-heading: var(--dark-color-heading); /* 标题颜色 */
+  --color-subtext: var(--dark-color-subtext); /* 内容区次要文字 */
+
+  /* 奇偶行背景色 */
+  --color-background-odd: #495d89; /* 偶数行背景色：深蓝色 */
+  --color-background-even: #5e6b99; /* 奇数行背景色：浅蓝色 */
+
+  /* 鼠标悬停时的背景色 */
+  --color-hover: #27b6e2; /* 悬停背景色：亮蓝色 */
+}
+
+/* 🌕 Light Theme */
+body.light {
+  /* 亮色主题颜色映射 */
+  --color-primary: var(--light-color-primary); /* 主色：按钮、图表主线 */
+  --color-accent: var(--light-color-accent); /* 点缀色：hover、图标、强调 */
+  --color-success: var(--light-color-success); /* 成功色：及格/通过 */
+  --color-warning: var(--light-color-warning); /* 警告色 */
+  --color-danger: var(--light-color-danger); /* 错误色：不及格等 */
+
+  --color-bg: var(--light-color-bg); /* 页面背景 */
+  --color-panel: var(--light-color-panel); /* 顶部导航背景 */
+  --color-card: var(--light-color-card); /* 卡片背景 */
+  --color-text: var(--light-color-text); /* 正文主字体颜色 */
+  --color-muted: var(--light-color-muted); /* 次文字颜色 */
+  --color-border: var(--light-color-border); /* 边框线 */
+
+  --color-heading: var(--light-color-heading); /* 标题文字颜色 */
+  --color-subtext: var(--light-color-subtext); /* 内容区次要文字 */
+
+  --color-background-odd: #e5f0fd; /* 偶数行背景色：浅蓝色 */
+  --color-background-even: #ffffff; /* 奇数行背景色：白色 */
+
+  --color-hover: #27b6e2; /* 悬停背景色：亮蓝色 */
+}
+
+/* 基本颜色变量 */
+:root {
+  /* 🌕 Light Theme */
+  --light-color-primary: #4c6fff; /* 主蓝色 */
+  --light-color-accent: #00d9ff; /* 辅助蓝色 */
+  --light-color-success: #3cd278; /* 成功色：绿色 */
+  --light-color-warning: #f6bd16; /* 警告色：黄色 */
+  --light-color-danger: #f2637b; /* 错误色：红色 */
+
+  --light-color-bg: #f4f7fd; /* 页面背景：淡蓝灰 */
+  --light-color-panel: #ffffff; /* 面板背景：纯白色 */
+  --light-color-card: #f9fbff; /* 卡片背景：白蓝色 */
+  --light-color-text: #2c3e50; /* 主文本：深蓝灰色 */
+  --light-color-muted: #666e7b; /* 次文本：浅灰蓝色 */
+  --light-color-border: #e0e6f1; /* 边框：淡蓝灰色 */
+
+  --light-color-heading: #2c3e50; /* 标题文字：深灰色 */
+  --light-color-subtext: #666e7b; /* 描述文字：浅灰色 */
+
+  /* 🌑 Dark Theme */
+  --dark-color-primary: #4c6fff; /* 主蓝色 */
+  --dark-color-accent: #00e3ff; /* 辅助蓝色 */
+  --dark-color-success: #3cd278; /* 成功色：绿色 */
+  --dark-color-warning: #f6bd16; /* 警告色：黄色 */
+  --dark-color-danger: #f2637b; /* 错误色：红色 */
+
+  --dark-color-bg: #0e1024; /* 页面背景：深色 */
+  --dark-color-panel: #1a1d3a; /* 顶部导航背景：稍亮 */
+  --dark-color-card: #25294d; /* 卡片背景：深色 */
+  --dark-color-text: #e4e8f3; /* 主文本：亮色 */
+  --dark-color-muted: #9ea5c3; /* 次文本：浅亮色 */
+  --dark-color-border: #353b64; /* 边框线：深色 */
+
+  --dark-color-heading: #f2f6ff; /* 标题文字：亮色 */
+  --dark-color-subtext: #a8aec9; /* 次要文字：清晰的颜色 */
+
+  --color-background-odd: #495d89; /* 偶数行背景色：深蓝色 */
+  --color-background-even: #5e6b99; /* 奇数行背景色：浅蓝色 */
+
+  --color-hover: #27b6e2; /* 悬停背景色：亮蓝色 */
+}
+
+/* 平滑过渡主题切换 */
+html,
+body {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
