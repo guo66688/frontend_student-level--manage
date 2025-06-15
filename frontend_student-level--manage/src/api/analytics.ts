@@ -17,7 +17,10 @@ export interface PassRateItem {
   total: number
   rate: number // 如果你仍想把 rate 传百分比字符串，就改成 string
 }
-
+export interface ClassAvgItem {
+  class_name: string
+  avg_score: number
+}
 export interface RankItem {
   student_name: string
   avg_score: number
@@ -37,4 +40,12 @@ export function getPassRate(): Promise<PassRateItem[]> {
 
 export function getRankList(): Promise<RankItem[]> {
   return request.get<RankItem[]>('/analysis/rank')
+}
+
+export function getExamCount() {
+  return request.get<{ total: number }>('/analysis/exam_count')
+}
+
+export function getClassAvg(): Promise<ClassAvgItem[]> {
+  return request.get<ClassAvgItem[]>('/analysis/class_avg')
 }
