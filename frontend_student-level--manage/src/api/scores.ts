@@ -26,11 +26,11 @@ export function getScores(
     })
     .then((response) => {
       // 确保返回的结构始终是 { data: Score[], total: number }
-      if (Array.isArray(response.data)) {
-        // 如果返回的数据是数组，包装成符合结构的对象
-        return { data: response.data, total: response.data.length }
-      }
-      return response.data // 正常返回结构
+      // if (Array.isArray(response.data)) {
+      //   // 如果返回的数据是数组，包装成符合结构的对象
+      //   return { data: response.data, total: response.data.length }
+      // }
+      return response // 正常返回结构
     })
 }
 

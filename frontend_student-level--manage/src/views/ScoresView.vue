@@ -102,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import axios from 'axios'
+// import axios from 'axios'
 import { ref, onMounted, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getScores, addScore, updateScore } from '@/api/scores'
@@ -146,20 +146,20 @@ const form = ref<Partial<Score>>({
   exam_date: '',
 })
 
-async function fetchCourses() {
-  try {
-    const res = await axios.get('/courses')
-    courses.value = res.data
-  } catch {
-    ElMessage.error('获取课程列表失败')
-  }
-}
+// async function fetchCourses() {
+//   try {
+//     const res = await axios.get('/courses')
+//     courses.value = res.data
+//   } catch {
+//     ElMessage.error('获取课程列表失败')
+//   }
+// }
 
 async function fetchScores(page = 1, query = '', studentNo = '', courseName = '') {
   try {
     const res = await getScores(page, pageSize.value, query, studentNo, courseName)
     console.log('响应数据:', res) // 打印返回的数据
-
+    console.log('总数:', res.total)
     // 确保响应数据包含 `data` 和 `total` 字段
     if (res && res.data && res.total !== undefined) {
       scores.value = res.data
@@ -255,7 +255,7 @@ function handlePageChange(page: number) {
 
 onMounted(() => {
   fetchScores(currentPage.value)
-  fetchCourses()
+  // fetchCourses()
 })
 </script>
 
@@ -272,6 +272,17 @@ onMounted(() => {
   margin-top: 15px;
   margin-right: 15px; /* 为搜索框添加右外边距 */
   margin-bottom: 15px; /* 为搜索框添加底部外边距 */
+  width: 200px; /* 设置固定宽度，避免过宽 */
+  padding: 5px 8px; /* 给输入框增加内边距 */
+  border-radius: 8px; /* 圆角效果 */
+  border: 1px solid #dcdfe6; /* 边框颜色 */
+}
+.scores-header {
+  display: flex;
+  justify-content: space-between; /* 让内容均匀分布 */
+  align-items: center; /* 垂直居中对齐 */
+  gap: 20px; /* 增加间距，让元素之间不再显得过于紧凑 */
+  margin-bottom: 20px; /* 给表格和标题之间留出间距 */
 }
 
 .el-button,
