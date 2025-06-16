@@ -16,7 +16,7 @@ export function getCourses(
   query: string = '' // 添加 query 参数
 ): Promise<{ data: Course[]; total: number }> {
   return request
-    .get<{ data: Course[]; total: number }>('/api/courses', {
+    .get<{ data: Course[]; total: number }>('/courses', {
       params: { page, size, query }, // 将 query 添加到请求参数中
     })
     .then((response) => {
@@ -31,7 +31,7 @@ export function getCourses(
 
 // 添加课程
 export function addCourse(course: Course): Promise<Course> {
-  return request.post<{ msg: string; course: Course }>('/api/courses', course).then((response) => {
+  return request.post<{ msg: string; course: Course }>('/courses', course).then((response) => {
     // response.data 中包含 msg 和 course
     return response.course // 返回 course 字段
   })
@@ -39,17 +39,15 @@ export function addCourse(course: Course): Promise<Course> {
 
 // 更新课程
 export function updateCourse(id: number, course: Course): Promise<Course> {
-  return request
-    .put<{ msg: string; course: Course }>(`/api/courses/${id}`, course)
-    .then((response) => {
-      // response.data 中包含 msg 和 course
-      return response.data.course // 返回 course 字段
-    })
+  return request.put<{ msg: string; course: Course }>(`/courses/${id}`, course).then((response) => {
+    // response.data 中包含 msg 和 course
+    return response.data.course // 返回 course 字段
+  })
 }
 
 // 删除课程
 export function deleteCourse(id: number): Promise<string> {
-  return request.delete<{ msg: string }>(`/api/courses/${id}`).then((response) => {
+  return request.delete<{ msg: string }>(`/courses/${id}`).then((response) => {
     // response.data 中只有 msg
     return response.data.msg // 返回 msg 字段
   })

@@ -1,4 +1,3 @@
-<!-- src\components\Layout.vue -->
 <template>
   <div class="app-container">
     <!-- 状态栏 -->
@@ -7,7 +6,6 @@
         <img src="@/assets/logo.png" class="header-logo" />
         <span class="header-title">学生成绩管理系统</span>
         <ThemeToggle @toggle-theme="toggleTheme" />
-        <!-- 监听主题切换事件 -->
       </div>
       <div class="user-info">
         <el-avatar src="path-to-user-avatar" alt="user-avatar" />
@@ -27,7 +25,6 @@
       <!-- 侧边栏 -->
       <aside class="sidebar" :class="{ collapsed: isCollapsed }">
         <div class="collapse-btn-wrapper">
-          <!-- 使用注册的图标组件 -->
           <el-button
             :icon="isCollapsed ? 'ElIconSFold' : 'ElIconSUnfold'"
             @click="isCollapsed = !isCollapsed"
@@ -61,6 +58,20 @@
             <el-icon class="sidebar-icon"><Document /></el-icon>
             <span>成绩管理</span>
           </el-menu-item>
+
+          <!-- 新增菜单项 -->
+          <el-menu-item index="/classes">
+            <el-icon class="sidebar-icon"><School /></el-icon>
+            <span>班级管理</span>
+          </el-menu-item>
+          <el-menu-item index="/charts">
+            <el-icon class="sidebar-icon"><Picture /></el-icon>
+            <span>图表管理</span>
+          </el-menu-item>
+          <el-menu-item index="/ranking">
+            <el-icon class="sidebar-icon"><Rank /></el-icon>
+            <span>排行榜</span>
+          </el-menu-item>
           <el-menu-item index="/analysis">
             <el-icon class="sidebar-icon"><DataAnalysis /></el-icon>
             <span>统计分析</span>
@@ -70,7 +81,6 @@
 
       <!-- 主内容区 -->
       <main class="main-content">
-        <!-- 渲染页面的内容 -->
         <router-view />
       </main>
     </div>
@@ -81,26 +91,32 @@
 import { useRoute } from 'vue-router'
 import { ref } from 'vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
-import { HomeFilled, UserFilled, Notebook, Document, DataAnalysis } from '@element-plus/icons-vue'
+import {
+  HomeFilled,
+  UserFilled,
+  Notebook,
+  Document,
+  DataAnalysis,
+  School,
+  Rank,
+  Picture,
+} from '@element-plus/icons-vue'
 
 const route = useRoute()
 const isCollapsed = ref(false)
 
 const logout = () => {
-  // 退出逻辑，比如清除 token 并重定向到登录页面
   localStorage.removeItem('token')
   window.location.href = '/login'
 }
 
-// 切换主题时调用
 const toggleTheme = () => {
   const newTheme = document.body.classList.contains('dark') ? 'light' : 'dark'
   document.body.classList.toggle('dark', newTheme === 'dark')
   updateThemeColors(newTheme)
-  window.location.reload() // 切换主题后刷新页面
+  window.location.reload()
 }
 
-// 更新主题颜色
 const updateThemeColors = (theme: 'light' | 'dark') => {
   if (theme === 'dark') {
     document.documentElement.style.setProperty('--color-bg', '#25294d')
@@ -113,7 +129,6 @@ const updateThemeColors = (theme: 'light' | 'dark') => {
 </script>
 
 <style scoped>
-/* 外层容器 */
 .app-container {
   display: flex;
   flex-direction: column;
@@ -121,7 +136,6 @@ const updateThemeColors = (theme: 'light' | 'dark') => {
   overflow: hidden;
 }
 
-/* 状态栏样式 */
 .header {
   display: flex;
   justify-content: space-between;
@@ -172,22 +186,6 @@ const updateThemeColors = (theme: 'light' | 'dark') => {
   letter-spacing: 1px;
 }
 
-.header-left :deep(.el-button) {
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border-radius: 50%;
-  background-color: transparent;
-  border: 1px solid var(--color-border);
-  transition: all 0.3s ease;
-  color: var(--color-text);
-}
-
-.header-left :deep(.el-button):hover {
-  background-color: var(--color-bg);
-  box-shadow: 0 0 8px rgba(76, 111, 255, 0.15);
-}
-
 .user-info {
   display: flex;
   align-items: center;
@@ -215,15 +213,15 @@ const updateThemeColors = (theme: 'light' | 'dark') => {
   padding-top: 60px;
   overflow-y: auto;
   position: relative;
-  align-items: stretch; /* ✅ 让 el-menu 撑满宽度（代替 center） */
+  align-items: stretch;
   border-radius: 0 8px 8px 0;
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
   color: var(--color-text);
 }
 
 .sidebar :deep(.el-menu) {
-  width: 100%; /* ✅ 撑满侧边栏宽度 */
-  box-shadow: none !important; /* ✅ 避免边界残影 */
+  width: 100%;
+  box-shadow: none !important;
   border-right: none !important;
 }
 
@@ -231,8 +229,8 @@ const updateThemeColors = (theme: 'light' | 'dark') => {
   color: var(--color-subtext) !important;
   justify-content: center;
   font-weight: 500;
-  font-size: 14px; /* ✅ 统一字号 */
-  padding: 10px 20px; /* 可调 */
+  font-size: 14px;
+  padding: 10px 20px;
 }
 
 .sidebar :deep(.el-menu-item.is-active) {
@@ -244,29 +242,6 @@ const updateThemeColors = (theme: 'light' | 'dark') => {
 .sidebar :deep(.el-menu-item:hover) {
   background-color: var(--color-panel) !important;
   color: var(--color-text) !important;
-}
-.sidebar :deep(i.sidebar-icon) {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  background: none;
-  border: none;
-}
-
-.sidebar :deep(.sidebar-icon) {
-  font-size: 18px;
-  margin-right: 8px;
-  color: var(--color-subtext); /* 默认图标色 */
-  transition: color 0.3s ease;
-  vertical-align: middle; /* ✅ 让图标在文字中垂直居中 */
-}
-
-.sidebar :deep(.el-menu-item.is-active .sidebar-icon) {
-  color: var(--color-primary); /* 激活项图标色 */
-}
-
-.sidebar :deep(.el-menu-item:hover .sidebar-icon) {
-  color: var(--color-text); /* 悬停时图标变亮 */
 }
 
 .sidebar.collapsed {
@@ -286,24 +261,6 @@ const updateThemeColors = (theme: 'light' | 'dark') => {
 .sidebar.collapsed .collapse-btn-wrapper {
   left: auto;
   right: 10px;
-}
-
-.el-button .el-icon-s-unfold {
-  transform: rotate(0deg);
-}
-
-.sidebar.collapsed .el-button .el-icon-s-unfold {
-  transform: rotate(180deg);
-}
-
-.el-button {
-  background: transparent !important;
-  position: relative;
-}
-
-.el-button .el-icon {
-  z-index: 10;
-  color: var(--color-primary);
 }
 
 .main-content {

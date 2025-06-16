@@ -13,7 +13,7 @@
     />
     <el-input
       v-model="studentNoQuery"
-      placeholder="学号"
+      placeholder="搜索学号"
       class="students-search"
       prefix-icon="el-icon-search"
       @keyup.enter="searchStudents"
@@ -22,7 +22,7 @@
     <!-- 班级搜索框 -->
     <el-input
       v-model="classNameQuery"
-      placeholder="班级"
+      placeholder="搜索班级"
       class="students-search"
       prefix-icon="el-icon-search"
       @keyup.enter="searchStudents"
@@ -101,7 +101,6 @@
 </template>
 
 <script setup lang="ts">
-import axios from 'axios'
 import { ref, onMounted, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getStudents, createStudent, updateStudent } from '@/api/students'
@@ -142,16 +141,6 @@ const form = ref<Partial<Student>>({
   gender: '',
   class: { id: 0, name: '' } as Class, // 确保 class 字段初始化
 })
-
-// 拉取班级数据
-async function fetchClasses() {
-  try {
-    const res = await axios.get('/classes')
-    classes.value = res.data
-  } catch {
-    ElMessage.error('获取班级列表失败')
-  }
-}
 
 // 拉取学生数据
 async function fetchStudents(
@@ -241,7 +230,6 @@ function handlePageChange(page: number) {
 // 加载数据
 onMounted(() => {
   fetchStudents(currentPage.value)
-  fetchClasses()
 })
 </script>
 
