@@ -286,6 +286,12 @@ onMounted(async () => {
         axisLabel: { color: currentColors.text },
         axisLine: { lineStyle: { color: currentColors.border } },
         splitLine: { lineStyle: { color: currentColors.border, type: 'dashed' } },
+        // 这里给轴名称设置样式
+        nameTextStyle: {
+          color: currentColors.text, // 你要的颜色
+          fontSize: 14, // 字号也可以自定义
+          padding: [0, 0, 10, 0], // 距离轴线的间距
+        },
       },
       series: [
         {
