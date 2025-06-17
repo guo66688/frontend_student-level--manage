@@ -64,6 +64,9 @@
             <el-icon class="sidebar-icon"><School /></el-icon>
             <span>班级管理</span>
           </el-menu-item>
+
+
+
           <el-menu-item index="/charts">
             <el-icon class="sidebar-icon"><Picture /></el-icon>
             <span>图表管理</span>
@@ -72,11 +75,24 @@
             <el-icon class="sidebar-icon"><Rank /></el-icon>
             <span>排行榜</span>
           </el-menu-item>
-          <el-menu-item index="/analysis">
-            <el-icon class="sidebar-icon"><DataAnalysis /></el-icon>
-            <span>统计分析</span>
-          </el-menu-item>
         </el-menu>
+        <!-- 统计分析折叠项 -->
+          <el-collapse v-model="activeNames" class="collapse-container">
+            <el-collapse-item title="统计分析" name="analysis">
+              <template #title>
+                <el-icon><DataAnalysis /></el-icon> <!-- 添加图标 -->
+                <span>统计分析</span>
+              </template>
+              <el-menu class="submenu">
+                <el-menu-item index="/analysis/view">
+                  <span>分析视图</span>
+                </el-menu-item>
+                <el-menu-item index="/analysis/data">
+                  <span>数据统计</span>
+                </el-menu-item>
+              </el-menu>
+            </el-collapse-item>
+          </el-collapse>
       </aside>
 
       <!-- 主内容区 -->
@@ -86,6 +102,7 @@
     </div>
   </div>
 </template>
+
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
@@ -126,6 +143,8 @@ const updateThemeColors = (theme: 'light' | 'dark') => {
     document.documentElement.style.setProperty('--color-text', '#000000')
   }
 }
+
+const activeNames = ref(['analysis'])  // 默认展开统计分析项
 </script>
 
 <style scoped>
@@ -154,6 +173,7 @@ const updateThemeColors = (theme: 'light' | 'dark') => {
 .header-left {
   display: flex;
   align-items: center;
+  justify-content: center;
   position: absolute;
   left: 16px;
   top: 50%;
@@ -225,33 +245,15 @@ const updateThemeColors = (theme: 'light' | 'dark') => {
   border-right: none !important;
 }
 
-.sidebar :deep(.el-menu-item) {
-  color: var(--color-subtext) !important;
-  justify-content: center;
-  font-weight: 500;
-  font-size: 14px;
-  padding: 10px 20px;
-}
-
-.sidebar :deep(.el-menu-item.is-active) {
-  color: var(--color-primary) !important;
-  background-color: transparent !important;
-  font-weight: 600;
-}
-
-.sidebar :deep(.el-menu-item:hover) {
-  background-color: var(--color-panel) !important;
-  color: var(--color-text) !important;
-}
-
 .sidebar.collapsed {
   width: 64px;
 }
 
 .collapse-btn-wrapper {
   position: absolute;
-  top: 10px;
-  left: 0;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%); /* 居中按钮 */
   width: 100%;
   display: flex;
   justify-content: center;
@@ -261,6 +263,116 @@ const updateThemeColors = (theme: 'light' | 'dark') => {
 .sidebar.collapsed .collapse-btn-wrapper {
   left: auto;
   right: 10px;
+  transform: none; /* 在折叠状态下，按钮右对齐 */
+}
+
+/* collapse-container 样式 */
+.collapse-container {
+  padding-left: 20px;
+  margin-bottom: 5px;
+  background-color: transparent;
+}
+
+/* 确保 el-menu 和 el-menu-item 居中对齐 */
+::v-deep .el-menu {
+  background-color: var(--color-card) !important; /* 背景色 */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* 保证顶部对齐 */
+  align-items: stretch; /* 使子菜单项宽度占满父容器 */
+  padding-left: 0 !important; /* 去除不必要的左侧缩进 */
+  width: 100%;
+  margin: 0; /* 清除默认的margin */
+}
+
+/* 确保子菜单项的宽度占满父容器 */
+::v-deep .el-menu-item {
+  background-color: var(--color-card) !important; /* 背景色 */
+  display: flex;
+  justify-content: center !important; /* 水平居中 */
+  align-items: center !important; /* 垂直居中 */
+  font-weight: 500;
+  font-size: 14px;
+  padding: 10px 20px !important; /* 内边距 */
+  width: 100%; /* 确保子菜单项宽度占满父容器 */
+}
+/* 确保子菜单项激活和悬停时的样式一致 */
+::v-deep .el-menu-item.is-active {
+  color: var(--color-primary) !important; /* 激活项颜色 */
+  background-color: transparent !important; /* 背景透明 */
+  font-weight: 600; /* 加粗 */
+}
+
+::v-deep .el-menu-item:hover {
+  background-color: var(--color-panel) !important; /* 悬停时背景色 */
+  color: var(--color-text) !important; /* 悬停时文本颜色 */
+}
+
+/* 确保折叠项标题居中 */
+::v-deep .el-collapse-item__header {
+  background-color: var(--color-card) !important;  /* 设置背景色 */
+  padding: 20px 50px !important; /* 内边距 */
+  display: flex;
+  justify-content: center !important; /* 水平居中对齐 */
+  align-items: center !important; /* 垂直居中对齐 */
+  font-weight: 600 !important; /* 加粗 */
+  font-size: 14px !important; /* 字体大小 */
+  color: var(--color-text) !important; /* 文本颜色 */
+  width: 100% !important; /* 确保宽度占满父容器 */
+  box-sizing: border-box;
+  border: none !important; /* 清除默认的边框 */
+  flex-wrap: nowrap !important; /* 确保子元素不换行 */
+}
+
+
+/* 让图标居中且与文本之间有一定间距 */
+::v-deep .el-collapse-item__title {
+  background-color: var(--color-card) !important;
+  display: flex; /* 使用flex布局 */
+  justify-content: flex-start; /* 图标和标题左对齐 */
+  align-items: center; /* 垂直居中对齐 */
+  font-weight: 600; /* 加粗 */
+  font-size: 14px; /* 字体大小 */
+  color: var(--color-text) !important; /* 设置文本颜色 */
+  width: 100%; /* 确保宽度占满父容器 */
+  gap: 5px; /* 图标和文本之间的间距 */
+}
+/* 控制折叠项图标位置 */
+::v-deep .el-collapse-item__header i {
+  margin-right: 10px; /* 图标和标题之间的间距 */
+  order: 0;  /* 确保图标在标题前 */
+  flex-shrink: 0; /* 防止图标被压缩 */
+}
+
+/* 确保折叠项的内容区域有合适的内边距 */
+::v-deep .el-collapse-item__content {
+  background-color: var(--color-card) !important; /* 背景色 */
+  padding: 10px 20px !important; /* 内容内边距 */
+  height: auto !important; /* 自动高度 */
+  box-sizing: border-box;
+}
+::v-deep .el-collapse {
+  background-color: var(--color-card) !important; /* 背景色 */
+  width: 100% !important;  /* 确保折叠容器宽度适应父容器 */
+  box-sizing: border-box;
+  background-color: transparent !important;  /* 设置背景透明 */
+}
+/* 确保折叠按钮在缩小状态下正确对齐 */
+.collapse-btn-wrapper {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 100;
+}
+
+.sidebar.collapsed .collapse-btn-wrapper {
+  left: auto;
+  right: 10px;
+  transform: none; /* 在折叠状态下，按钮右对齐 */
 }
 
 .main-content {
