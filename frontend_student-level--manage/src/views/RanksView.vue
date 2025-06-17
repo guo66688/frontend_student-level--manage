@@ -4,6 +4,7 @@
     <div class="rankings-container">
       <h2>综合成绩排行榜</h2>
       <el-tabs type="border-card">
+        <!-- 学生平均成绩 -->
         <el-tab-pane label="学生平均成绩">
           <div class="rank-table-wrapper">
             <rank-table
@@ -12,9 +13,15 @@
               searchable
               sortable
               paginated
+              :filters="[
+                { prop: 'student_name', placeholder: '搜索学生姓名' },
+                { prop: 'avg_score', placeholder: '搜索平均成绩' },
+              ]"
             />
           </div>
         </el-tab-pane>
+
+        <!-- 课程平均分 -->
         <el-tab-pane label="课程平均分">
           <div class="rank-table-wrapper">
             <rank-table
@@ -23,9 +30,15 @@
               searchable
               sortable
               paginated
+              :filters="[
+                { prop: 'course_name', placeholder: '搜索课程名称' },
+                { prop: 'avg_score', placeholder: '搜索平均分' },
+              ]"
             />
           </div>
         </el-tab-pane>
+
+        <!-- 班级平均分 -->
         <el-tab-pane label="班级平均分">
           <div class="rank-table-wrapper">
             <rank-table
@@ -34,9 +47,15 @@
               searchable
               sortable
               paginated
+              :filters="[
+                { prop: 'class_name', placeholder: '搜索班级名称' },
+                { prop: 'avg_score', placeholder: '搜索平均成绩' },
+              ]"
             />
           </div>
         </el-tab-pane>
+
+        <!-- 课程通过率 -->
         <el-tab-pane label="课程通过率">
           <div class="rank-table-wrapper">
             <rank-table
@@ -45,6 +64,10 @@
               searchable
               sortable
               paginated
+              :filters="[
+                { prop: 'course_name', placeholder: '搜索课程名称' },
+                { prop: 'pass_rate_str', placeholder: '搜索通过率 (%)' },
+              ]"
             />
           </div>
         </el-tab-pane>
@@ -128,7 +151,6 @@ onMounted(async () => {
 
 ::v-deep .el-table {
   border-radius: 10px;
-  background-color: var(--color-text) !important;
   overflow: hidden; /* 避免内容溢出 */
 }
 ::v-deep .el-table th {
@@ -145,10 +167,10 @@ onMounted(async () => {
 }
 
 ::v-deep .el-table__body tr:nth-child(odd) {
-  background-color: var(--color-background-odd, #1d1d2f) !important;
+  background-color: var(--color-background-odd) !important;
 }
 ::v-deep .el-table__body tr:nth-child(even) {
-  background-color: var(--color-background-even, #232336) !important;
+  background-color: var(--color-background-even) !important;
 }
 
 ::v-deep .el-table__body tr:nth-child(odd) td {
@@ -161,27 +183,6 @@ onMounted(async () => {
 ::v-deep .el-table__body tr:hover td {
   background-color: var(--color-hover, #2e3454) !important;
   color: var(--color-text, #ffffff) !important;
-}
-
-::v-deep .el-pagination {
-  justify-content: center;
-  padding: 12px 0;
-  /* background-color: var(--color-card); */
-  border-radius: 10px;
-  margin-top: 20px; /* 分页与表格之间添加间距 */
-}
-
-::v-deep .el-pagination button {
-  background-color: var(--color-primary) !important;
-  border: 1px solid var(--color-primary) !important;
-  color: #ffffff !important;
-  border-radius: 50%;
-  padding: 8px 12px;
-}
-
-::v-deep .el-pagination button:hover {
-  background-color: var(--color-hover) !important;
-  border-color: var(--color-hover) !important;
 }
 
 ::v-deep .el-tabs__nav {
@@ -200,4 +201,93 @@ onMounted(async () => {
   font-weight: bold;
 }
 
+::v-deep .el-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* 新增这行：水平居中 */
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+::v-deep .el-pagination .el-pager {
+  margin: 0 8px;
+  display: flex;
+  padding: 0;
+}
+
+::v-deep .el-pagination .el-pager li {
+  margin: 0 4px;
+}
+
+::v-deep .el-pagination .el-pager li button {
+  display: flex; /* 改为 flex 布局 */
+  align-items: center; /* 垂直居中内容 */
+  justify-content: center; /* 水平居中内容 */
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+/* 悬停（普通页码／prev/next） */
+::v-deep .el-pagination .el-pager li button:hover,
+::v-deep .el-pagination .btn--prev button:hover,
+::v-deep .el-pagination .btn--next button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: #fff;
+}
+
+/* 当前页只亮边框＋文字 */
+::v-deep .el-pagination .el-pager li.is-active button {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: #fff;
+  font-weight: bold;
+  /* 可选：加个微弱阴影 */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* 当前页悬停 */
+::v-deep .el-pagination .el-pager li.is-active button:hover {
+  background-color: rgba(66, 133, 244, 0.25) !important;
+}
+
+/* 上一页/下一页按钮悬停 */
+::v-deep .el-pagination .btn--prev button:hover,
+::v-deep .el-pagination .btn--next button:hover {
+  background-color: rgba(66, 133, 244, 0.1) !important;
+  color: var(--color-primary) !important;
+}
+
+/* 禁用态 */
+::v-deep .el-pagination .btn--prev.is-disabled button,
+::v-deep .el-pagination .btn--next.is-disabled button {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 省略号 */
+::v-deep .el-pagination .el-pager li.is-ellipsis button {
+  background: transparent;
+  color: #999;
+  box-shadow: none;
+  cursor: default;
+}
+
+/* 每页条数选择 */
+::v-deep .el-pagination__sizes select {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px 8px;
+  background-color: #fafafa;
+  transition: border-color 0.2s;
+}
+::v-deep .el-pagination__sizes select:hover {
+  border-color: var(--color-primary);
+}
 </style>

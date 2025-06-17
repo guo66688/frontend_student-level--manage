@@ -302,11 +302,6 @@ onMounted(() => {
   margin-top: 20px;
 }
 
-.el-pagination {
-  margin-top: 20px;
-  justify-content: center;
-}
-
 /* 表格与搜索框之间的间距 */
 .el-table {
   margin-top: 10px; /* 给表格增加顶部外边距，使其与搜索框有更多间隔 */
@@ -372,5 +367,95 @@ onMounted(() => {
   font-size: 16px !important;
   border-radius: 8px !important;
   transition: all 0.3s ease !important;
+}
+
+::v-deep .el-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* 新增这行：水平居中 */
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+::v-deep .el-pagination .el-pager {
+  margin: 0 8px;
+  display: flex;
+  padding: 0;
+}
+
+::v-deep .el-pagination .el-pager li {
+  margin: 0 4px;
+}
+
+::v-deep .el-pagination .el-pager li button {
+  display: flex; /* 改为 flex 布局 */
+  align-items: center; /* 垂直居中内容 */
+  justify-content: center; /* 水平居中内容 */
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+/* 悬停（普通页码／prev/next） */
+::v-deep .el-pagination .el-pager li button:hover,
+::v-deep .el-pagination .btn--prev button:hover,
+::v-deep .el-pagination .btn--next button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: #fff;
+}
+
+/* 当前页只亮边框＋文字 */
+::v-deep .el-pagination .el-pager li.is-active button {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: #fff;
+  font-weight: bold;
+  /* 可选：加个微弱阴影 */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* 当前页悬停 */
+::v-deep .el-pagination .el-pager li.is-active button:hover {
+  background-color: rgba(66, 133, 244, 0.25) !important;
+}
+
+/* 上一页/下一页按钮悬停 */
+::v-deep .el-pagination .btn--prev button:hover,
+::v-deep .el-pagination .btn--next button:hover {
+  background-color: rgba(66, 133, 244, 0.1) !important;
+  color: var(--color-primary) !important;
+}
+
+/* 禁用态 */
+::v-deep .el-pagination .btn--prev.is-disabled button,
+::v-deep .el-pagination .btn--next.is-disabled button {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 省略号 */
+::v-deep .el-pagination .el-pager li.is-ellipsis button {
+  background: transparent;
+  color: #999;
+  box-shadow: none;
+  cursor: default;
+}
+
+/* 每页条数选择 */
+::v-deep .el-pagination__sizes select {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px 8px;
+  background-color: #fafafa;
+  transition: border-color 0.2s;
+}
+::v-deep .el-pagination__sizes select:hover {
+  border-color: var(--color-primary);
 }
 </style>
