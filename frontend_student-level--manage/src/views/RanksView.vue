@@ -121,13 +121,21 @@ onMounted(async () => {
   flex: 1;
   display: flex;
   flex-direction: column;
+  /* background-color: var(--color-card) !important; */
   min-height: 0;
   overflow: hidden;
 }
 
+::v-deep .el-table {
+  border-radius: 10px;
+  background-color: var(--color-text) !important;
+  overflow: hidden; /* 避免内容溢出 */
+}
 ::v-deep .el-table th {
   background-color: var(--color-card) !important;
   color: var(--color-text) !important;
+  text-align: center;
+  padding: 12px 15px;
   font-weight: bold !important;
 }
 
