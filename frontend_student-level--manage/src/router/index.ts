@@ -4,7 +4,9 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import CoursesView from '../views/CoursesView.vue'
 import StudentsView from '../views/StudentsView.vue' // 导入 StudentsView
-import ScoresView from '../views/ScoresView.vue' // 导入 StudentsView
+import ScoresView from '../views/ScoresView.vue'
+import ClassesView from '../views/ClassesView.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -39,6 +41,12 @@ const router = createRouter({
       path: '/scores', // 新增 Students 路由
       name: 'Scores',
       component: ScoresView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/classes', // 新增 Students 路由
+      name: 'Classes',
+      component: ClassesView,
       meta: { requiresAuth: true },
     },
     // 其他路由...
