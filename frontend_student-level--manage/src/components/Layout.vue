@@ -68,7 +68,7 @@
             <el-icon class="sidebar-icon"><Picture /></el-icon>
             <span>图表管理</span>
           </el-menu-item>
-          <el-menu-item index="/ranking">
+          <el-menu-item index="/ranks">
             <el-icon class="sidebar-icon"><Rank /></el-icon>
             <span>排行榜</span>
           </el-menu-item>

@@ -6,7 +6,7 @@ import CoursesView from '../views/CoursesView.vue'
 import StudentsView from '../views/StudentsView.vue' // 导入 StudentsView
 import ScoresView from '../views/ScoresView.vue'
 import ClassesView from '../views/ClassesView.vue'
-
+import RanksView from '../views/RanksView.vue' // 导入 RanksView
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -49,6 +49,13 @@ const router = createRouter({
       component: ClassesView,
       meta: { requiresAuth: true },
     },
+    {
+      path: '/Ranks', // 新增 Students 路由
+      name: 'Ranks',
+      component: RanksView,
+      meta: { requiresAuth: true },
+    },
+
     // 其他路由...
   ],
 })

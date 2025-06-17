@@ -40,10 +40,10 @@ export default [
       vue: vuePlugin,
     },
     rules: {
-      'vue/valid-v-for': 'warn', // 这里可以手动配置 Vue 3 规则
+      'vue/valid-v-for': 'warn', // Vue 3 rules
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_|^row$' }], // 添加到 Vue 配置中
     },
   },
-
   // TypeScript 配置
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -59,7 +59,7 @@ export default [
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_|^row$' }],
     },
   },
 
