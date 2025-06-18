@@ -18,7 +18,7 @@
 
     <!-- 班级表格 -->
     <el-table :data="classes" stripe style="margin-top: 20px">
-      <el-table-column prop="id" label="ID" width="80" align="center" />
+      <el-table-column prop="ID" label="ID" width="80" align="center" />
       <el-table-column prop="name" label="班级名称" align="center" />
       <el-table-column label="操作" align="center">
         <template #default="{ row }">
