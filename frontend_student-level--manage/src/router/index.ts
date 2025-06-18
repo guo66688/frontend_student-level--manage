@@ -1,12 +1,15 @@
 // src/router/index.ts
 import { createRouter, createWebHistory } from 'vue-router'
+
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import CoursesView from '../views/CoursesView.vue'
-import StudentsView from '../views/StudentsView.vue' // 导入 StudentsView
+import StudentsView from '../views/StudentsView.vue'
 import ScoresView from '../views/ScoresView.vue'
 import ClassesView from '../views/ClassesView.vue'
-import RanksView from '../views/RanksView.vue' // 导入 RanksView
+import RanksView from '../views/RanksView.vue'
+import ChartsView from '@/views/ChartsView.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -22,40 +25,85 @@ const router = createRouter({
     {
       path: '/home',
       name: 'Home',
-      component: HomeView, // 使用全局布局
-      meta: { requiresAuth: true },
+
+      children: [
+        {
+          path: '',
+          component: HomeView,
+          meta: { requiresAuth: true },
+        },
+      ],
     },
     {
       path: '/courses',
       name: 'Courses',
-      component: CoursesView, // 使用全局布局
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/students', // 新增 Students 路由
-      name: 'Students',
-      component: StudentsView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/scores', // 新增 Students 路由
-      name: 'Scores',
-      component: ScoresView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/classes', // 新增 Students 路由
-      name: 'Classes',
-      component: ClassesView,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/Ranks', // 新增 Students 路由
-      name: 'Ranks',
-      component: RanksView,
-      meta: { requiresAuth: true },
-    },
 
+      children: [
+        {
+          path: '',
+          component: CoursesView,
+          meta: { requiresAuth: true },
+        },
+      ],
+    },
+    {
+      path: '/students',
+      name: 'Students',
+      children: [
+        {
+          path: '',
+          component: StudentsView,
+          meta: { requiresAuth: true },
+        },
+      ],
+    },
+    {
+      path: '/scores',
+      name: 'Scores',
+
+      children: [
+        {
+          path: '',
+          component: ScoresView,
+          meta: { requiresAuth: true },
+        },
+      ],
+    },
+    {
+      path: '/classes',
+      name: 'Classes',
+
+      children: [
+        {
+          path: '',
+          component: ClassesView,
+          meta: { requiresAuth: true },
+        },
+      ],
+    },
+    {
+      path: '/ranks',
+      name: 'Ranks',
+
+      children: [
+        {
+          path: '',
+          component: RanksView,
+          meta: { requiresAuth: true },
+        },
+      ],
+    },
+    {
+      path: '/charts',
+      name: 'Charts',
+      children: [
+        {
+          path: '',
+          component: ChartsView,
+          meta: { requiresAuth: true },
+        },
+      ],
+    },
     // 其他路由...
   ],
 })
