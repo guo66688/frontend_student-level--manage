@@ -28,7 +28,7 @@ export function createClass(payload: { name: string }): Promise<Class> {
 export function updateClass(id: number, payload: { name: string }): Promise<Class> {
   return request
     .put<{ msg: string; class: Class }>(`/classes/${id}`, payload)
-    .then((res) => res.data.class) // ✅ 兼容 AxiosResponse
+    .then((res) => res.class) // ✅ 兼容 AxiosResponse
 }
 
 // 删除班级

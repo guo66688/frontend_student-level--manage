@@ -26,11 +26,23 @@
       <!-- 侧边栏 -->
       <aside class="sidebar" :class="{ collapsed: isCollapsed }">
         <div class="collapse-btn-wrapper">
-          <el-button :icon="isCollapsed ? 'ElIconSFold' : 'ElIconSUnfold'" @click="toggleSidebar" circle size="small" />
+          <el-button
+            :icon="isCollapsed ? 'ElIconSFold' : 'ElIconSUnfold'"
+            @click="toggleSidebar"
+            circle
+            size="small"
+          />
         </div>
 
-        <el-menu :collapse="isCollapsed" router :default-active="route.path" background-color="transparent"
-          text-color="var(--color-subtext)" active-text-color="var(--color-primary)" unique-opened>
+        <el-menu
+          :collapse="isCollapsed"
+          router
+          :default-active="route.path"
+          background-color="transparent"
+          text-color="var(--color-subtext)"
+          active-text-color="var(--color-primary)"
+          unique-opened
+        >
           <el-menu-item index="/home">
             <el-icon class="sidebar-icon">
               <HomeFilled />
@@ -88,7 +100,6 @@
             </el-icon>
             <span>数据统计</span>
           </el-menu-item>
-
         </el-menu>
 
         <!-- 统计分析折叠项 -->
@@ -115,16 +126,16 @@
       <!-- 主内容区 -->
       <main class="main-content">
         <!-- 强制重新渲染页面 -->
-        <router-view :key="$route.fullPath" />
+        <router-view />
       </main>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router';
-import { ref } from 'vue';
-import ThemeToggle from '@/components/ThemeToggle.vue';
+import { useRoute, useRouter } from 'vue-router'
+import { ref } from 'vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 import {
   HomeFilled,
   UserFilled,
@@ -135,48 +146,48 @@ import {
   Rank,
   Picture,
   DataBoard,
-} from '@element-plus/icons-vue';
+} from '@element-plus/icons-vue'
 
-const route = useRoute();
-const router = useRouter();  // 获取路由实例
-const isCollapsed = ref(false);
-const activeNames = ref(['analysis']); // 默认展开统计分析项
+const route = useRoute()
+const router = useRouter() // 获取路由实例
+const isCollapsed = ref(false)
+const activeNames = ref(['analysis']) // 默认展开统计分析项
 
 const logout = () => {
-  localStorage.removeItem('token');
-  window.location.href = '/login';
-};
+  localStorage.removeItem('token')
+  window.location.href = '/login'
+}
 
 const toggleTheme = () => {
-  const newTheme = document.body.classList.contains('dark') ? 'light' : 'dark';
-  document.body.classList.toggle('dark', newTheme === 'dark');
-  updateThemeColors(newTheme);
-  window.location.reload();
-};
+  const newTheme = document.body.classList.contains('dark') ? 'light' : 'dark'
+  document.body.classList.toggle('dark', newTheme === 'dark')
+  updateThemeColors(newTheme)
+  window.location.reload()
+}
 
 const updateThemeColors = (theme: 'light' | 'dark') => {
   if (theme === 'dark') {
-    document.documentElement.style.setProperty('--color-bg', '#25294d');
-    document.documentElement.style.setProperty('--color-text', '#e4e8f3');
+    document.documentElement.style.setProperty('--color-bg', '#25294d')
+    document.documentElement.style.setProperty('--color-text', '#e4e8f3')
   } else {
-    document.documentElement.style.setProperty('--color-bg', '#ffffff');
-    document.documentElement.style.setProperty('--color-text', '#000000');
+    document.documentElement.style.setProperty('--color-bg', '#ffffff')
+    document.documentElement.style.setProperty('--color-text', '#000000')
   }
-};
+}
 
 const handleCollapseChange = () => {
-  console.log(activeNames.value);
-};
+  console.log(activeNames.value)
+}
 
 const handleMenuSelect = (index: string) => {
-  console.log('Menu selected:', index);
-  router.push(index);  // 使用 router.push() 进行页面跳转
-};
+  console.log('Menu selected:', index)
+  router.push(index) // 使用 router.push() 进行页面跳转
+}
 
 // 切换侧边栏折叠状态
 const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value;
-};
+  isCollapsed.value = !isCollapsed.value
+}
 </script>
 
 <style scoped>

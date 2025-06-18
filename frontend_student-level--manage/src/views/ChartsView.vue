@@ -20,7 +20,15 @@
       <!-- 图表列表 -->
       <el-table :data="charts" stripe>
         <el-table-column prop="type" label="图表类型" sortable align="center" />
-        <el-table-column prop="meta.title" label="图表标题" align="center" />
+
+        <!-- 修改图表标题显示 -->
+        <el-table-column label="图表标题" align="center">
+          <template #default="{ row }">
+            {{ row.meta && row.meta.length > 0 ? row.meta[0].Value : '无标题' }}
+            <!-- 显示 meta[0].Value -->
+          </template>
+        </el-table-column>
+
         <el-table-column label="操作" align="center">
           <template #default="{ row }">
             <el-button size="small" @click="openEditDialog(row)" type="primary">编辑</el-button>
@@ -55,8 +63,9 @@
           <el-input v-model="form.type" />
         </el-form-item>
 
+        <!-- 图表标题 -->
         <el-form-item label="图表标题" prop="meta.title">
-          <el-input v-model="form.meta!.title" />
+          <el-input v-model="form.meta[0].Value" placeholder="请输入图表标题" />
         </el-form-item>
 
         <el-form-item label="数据源类型" prop="data_source_type">
@@ -76,15 +85,15 @@
             :stripe="true"
             :empty-text="'暂无数据'"
           >
-            <el-table-column label="X轴" prop="x">
+            <el-table-column label="X轴数据" prop="x">
               <template #default="{ row }">
-                <el-input v-model="row.x" placeholder="请输入 X 值" size="small" />
+                <el-input v-model="row.x" placeholder="请输入 X 值，使用逗号分隔" size="small" />
               </template>
             </el-table-column>
 
-            <el-table-column label="Y轴" prop="y">
+            <el-table-column label="Y轴数据" prop="y">
               <template #default="{ row }">
-                <el-input v-model="row.y" placeholder="请输入 Y 值" size="small" />
+                <el-input v-model="row.y" placeholder="请输入 Y 值，使用逗号分隔" size="small" />
               </template>
             </el-table-column>
 
@@ -112,7 +121,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { getCharts, createChart, updateChart, deleteChart as apiDeleteChart } from '@/api/charts.ts'
 import type { ChartData } from '@/api/charts.ts'
 import type { FormInstance } from 'element-plus'
-import { toRaw } from 'vue'; // 引入 toRaw
+import { toRaw } from 'vue'
+
 // 图表数据
 const charts = ref<ChartData[]>([])
 const dialogVisible = ref(false)
@@ -139,27 +149,42 @@ const theme = computed(() => {
 const formRef = ref<FormInstance | null>(null)
 
 const form = ref<Partial<ChartData>>({
-  id: '', // 初始化为字符串类型，而不是 undefined
+  id: '',
   type: '',
-  meta: { title: '' },
-  data_source_type: 'static', // 默认静态数据
-  values: [], // 确保 values 为一个空数组，而不是 undefined
+  meta: [{ Key: '', Value: '' }],
+  data_source_type: 'static',
+  values: [{ x: [], y: [] }],
 })
 
 // 获取图表数据
 async function fetchCharts(page: number = 1, query: string = '') {
+  const pageSize = 10
   try {
-    const res = await getCharts(page, pageSize.value, query)
-    charts.value = res.data || []  // 确保给 charts 初始化一个默认值
-    totalCharts.value = res.total
+    const res = await getCharts(page, pageSize, query)
+
+    // 确保返回的数据是一个数组
+    if (Array.isArray(res.data)) {
+      charts.value = res.data
+      totalCharts.value = res.total || 0
+    } else {
+      console.error('返回的数据格式不正确，res.data 应该是数组')
+      charts.value = []
+      totalCharts.value = 0
+    }
   } catch (error) {
     console.error('获取图表列表失败:', error)
     ElMessage.error('获取图表列表失败')
+    charts.value = []
+    totalCharts.value = 0
   }
 }
-
-
-
+function someFunction(data: any) {
+  if (Array.isArray(data) && data.includes('someValue')) {
+    // 执行包含操作
+  } else {
+    console.error('data 不是数组，无法调用 includes 方法')
+  }
+}
 // 搜索图表
 function searchCharts() {
   fetchCharts(currentPage.value, searchQuery.value)
@@ -167,93 +192,104 @@ function searchCharts() {
 
 // 打开新增图表弹窗
 function openAddDialog() {
-  if (dialogVisible.value) return
+  if (dialogVisible.value) return // 删除这行代码
   isEditing.value = false
-  form.value = { type: '', meta: { title: '' }, data_source_type: 'static', values: [] }
-  dialogVisible.value = true
+  form.value = {
+    type: '',
+    meta: [{ Key: 'title', Value: '' }],
+    data_source_type: 'static',
+    values: [{ x: [], y: [] }],
+  }
+  console.log('打开对话框前 dialogVisible:', dialogVisible.value)
+  dialogVisible.value = true // 确保 dialogVisible 为 true
+  console.log('打开对话框后 dialogVisible:', dialogVisible.value)
 }
 
 // 打开编辑图表弹窗
-
 function openEditDialog(row: ChartData) {
   if (dialogVisible.value) return
   isEditing.value = true
-
-  // 通过复制 row 的数据确保 form 被正确更新
-  form.value = { ...row }
-  form.value.values = form.value.values || []
-  // console.log(form.value.values)
-
-  // 处理 values 数据，确保解析 x 和 y 字符串为数组
-  form.value.values = form.value.values.map((item) => {
-    // console.log('Item:', item);
-    const rawItem = toRaw(item); // 获取原始数据，去掉 Vue 的 Proxy
-
-    // console.log(rawItem.x); // 查看 x 的值
-    // console.log(rawItem.y); // 查看 y 的值
-
-    const x = rawItem.x;
-    const y = rawItem.y;
-
-    // console.log('x:', x);
-    // console.log('y:', y);
-      return {
-      // 保持 x 和 y 为字符串，如果是有效字符串或数组，保持原样
-      x: item.x ? (typeof item.x === 'string' ? item.x : JSON.stringify(item.x)) : '', // 转换为字符串
-      y: item.y ? (typeof item.y === 'string' ? item.y : JSON.stringify(item.y)) : '', // 转换为字符串
-    }
-  })
-
-  // console.log(form.value.values) // 打印以确认数据解析成功
+  form.value = {
+    ...row,
+    meta: row.meta || [{ Key: 'title', Value: '' }],
+    values: row.values || [{ x: [], y: [] }],
+  }
   dialogVisible.value = true
 }
 
 // 提交表单
+// async function submitForm() {
+//   try {
+//     if (formRef.value) {
+//       await formRef.value.validate()
+//     }
+//     form.value.meta = form.value.meta || [{ Key: 'title', Value: '' }]
+//     const xValues = form.value.values?.map((item: any) => item.x) || []
+//     const yValues = form.value.values?.map((item: any) => item.y) || []
+
+//     const formData = {
+//       ...form.value,
+//       meta: [{ Key: 'title', Value: form.value.meta[0]?.Value || '' }],
+//       values: { x: xValues, y: yValues }, // 确保 values 是包含 x 和 y 数组的对象
+//     }
+
+//     if (isEditing.value && formData.id) {
+//       await updateChart(formData.id, formData)
+//       ElMessage.success('更新成功')
+//     } else if (!isEditing.value) {
+//       await createChart(formData)
+//       ElMessage.success('新增成功')
+//     } else {
+//       throw new Error('表单没有正确提交，缺少 id')
+//     }
+
+//     dialogVisible.value = false
+//   } catch (error) {
+//     console.error('操作失败:', error)
+//     // ElMessage.error(`操作失败: ${error.message}`)
+//   }
+// }
 async function submitForm() {
   try {
     if (formRef.value) {
-      await formRef.value.validate()
+      await formRef.value.validate() // 表单验证
     }
+
+    // 如果 values 为空，重新初始化
+    form.value.values = form.value.values || [{ x: [], y: [] }]
+
+    form.value.meta = form.value.meta || [{ Key: 'title', Value: '' }]
+    const xValues = form.value.values?.map((item: any) => item.x) || []
+    const yValues = form.value.values?.map((item: any) => item.y) || []
 
     const formData = {
       ...form.value,
-      id: form.value.id || '',
-      type: form.value.type || '',
-      meta: form.value.meta || { title: '' },
-      data_source_type: form.value.data_source_type || 'static', // 确保选择了数据源类型
-      values: form.value.values || [], // 如果没有 values，则用空数组替代
+      meta: [{ Key: 'title', Value: form.value.meta[0]?.Value || '' }],
+      values: [{ x: xValues, y: yValues }], // 确保 values 包含 x 和 y 数组
     }
-    // console.log('Fetched charts:', charts.value)
-    console.log('formData.id:', formData.id); // 输出 id 检查值
 
     if (isEditing.value && formData.id) {
-      await updateChart(formData.id, formData)
+      await updateChart(formData.id, formData) // 更新图表
       ElMessage.success('更新成功')
     } else if (!isEditing.value) {
-      await createChart(formData)
+      await createChart(formData) // 创建新图表
       ElMessage.success('新增成功')
     } else {
       throw new Error('表单没有正确提交，缺少 id')
     }
-    console.log('Fetched charts:', charts.value)
 
-    // await fetchCharts(currentPage.value)
-
-    // console.log('Fetched charts:', charts.value)
-
-    dialogVisible.value = false
+    dialogVisible.value = false // 关闭对话框
   } catch (error) {
-    console.error('操作失败:', error)  // 输出详细的错误信息
-    const e = error as Error
-    ElMessage.error(`操作失败: ${e.message}`)
+    console.error('操作失败:', error)
+    // ElMessage.error(`操作失败: ${error.message}`);
   }
 }
 
-// 删除图表（重命名为 handleDeleteChart，避免与导入的 deleteChart 冲突）
+// 删除图表
 async function handleDeleteChart(id: string) {
   try {
     await ElMessageBox.confirm('确认删除该图表？', '警告', { type: 'warning' })
-    await apiDeleteChart(id) // 使用 apiDeleteChart 调用后端接口
+    await apiDeleteChart(id)
     ElMessage.success('删除成功')
     fetchCharts(currentPage.value)
   } catch {
@@ -277,16 +313,17 @@ function handleClose() {
   dialogVisible.value = false
 }
 
-// 添加数据
 function addData() {
-  form.value.values = form.value.values || []
-  form.value.values.push({ x: '', y: '0' }) // 默认添加一个空的数据项
+  if (!Array.isArray(form.value.values)) {
+    form.value.values = [] // 如果 values 不是数组，重设为数组
+  }
+  form.value.values.push({ x: [], y: [] }) // 添加新的 { x: [], y: [] }
 }
 
-// 删除数据行
 function removeData(index: number) {
-  form.value.values = form.value.values || []
-  form.value.values.splice(index, 1) // 删除指定索引的数据行
+  if (Array.isArray(form.value.values)) {
+    form.value.values.splice(index, 1) // 删除指定索引的数据
+  }
 }
 </script>
 
@@ -429,62 +466,5 @@ function removeData(index: number) {
   color: #333;
   border: 1px solid transparent;
   transition: all 0.2s;
-}
-/* 悬停（普通页码／prev/next） */
-::v-deep .el-pagination .el-pager li button:hover,
-::v-deep .el-pagination .btn--prev button:hover,
-::v-deep .el-pagination .btn--next button:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  background-color: #fff;
-}
-
-/* 当前页只亮边框＋文字 */
-::v-deep .el-pagination .el-pager li.is-active button {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  background-color: #fff;
-  font-weight: bold;
-  /* 可选：加个微弱阴影 */
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-/* 当前页悬停 */
-::v-deep .el-pagination .el-pager li.is-active button:hover {
-  background-color: rgba(66, 133, 244, 0.25) !important;
-}
-
-/* 上一页/下一页按钮悬停 */
-::v-deep .el-pagination .btn--prev button:hover,
-::v-deep .el-pagination .btn--next button:hover {
-  background-color: rgba(66, 133, 244, 0.1) !important;
-  color: var(--color-primary) !important;
-}
-
-/* 禁用态 */
-::v-deep .el-pagination .btn--prev.is-disabled button,
-::v-deep .el-pagination .btn--next.is-disabled button {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* 省略号 */
-::v-deep .el-pagination .el-pager li.is-ellipsis button {
-  background: transparent;
-  color: #999;
-  box-shadow: none;
-  cursor: default;
-}
-
-/* 每页条数选择 */
-::v-deep .el-pagination__sizes select {
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 4px 8px;
-  background-color: #fafafa;
-  transition: border-color 0.2s;
-}
-::v-deep .el-pagination__sizes select:hover {
-  border-color: var(--color-primary);
 }
 </style>
