@@ -42,8 +42,15 @@ export function getRankList(): Promise<RankItem[]> {
   return request.get<RankItem[]>('/analysis/rank')
 }
 
+// 假设后端接口返回的数据格式是这样
 export function getExamCount() {
-  return request.get<{ total: number }>('/analysis/exam_count')
+  return request
+    .get<{ total: number }>('/analysis/exam_count')
+    .then((response) => response)
+    .catch((error) => {
+      console.error('Error fetching exam count:', error)
+      return { total: 0 } // 如果发生错误，返回一个默认值
+    })
 }
 
 export function getClassAvg(): Promise<ClassAvgItem[]> {

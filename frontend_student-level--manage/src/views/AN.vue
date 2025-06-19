@@ -9,8 +9,9 @@
       <el-row :gutter="20">
         <el-col :span="4" v-for="(view, index) in displayedCharts" :key="view.id">
           <el-card>
-            <h3>{{ view.meta.title }}</h3>
-            <p>{{ view.meta.description }}</p>
+            <h3>{{ view.meta[0]?.Value || '无标题' }}</h3>
+            <!-- 使用安全操作符检查 view.meta -->
+            <p>{{ view.type }}</p>
           </el-card>
         </el-col>
       </el-row>
@@ -34,19 +35,22 @@
     <el-tabs v-model="activeTab" type="card">
       <el-tab-pane
         v-for="(view, index) in selectedCharts"
-        :label="view.meta.title"
-        :key="view.id"
+        :label="view.meta[0]?.Value || '无标题'"
         :name="view.id"
       >
-        <ChartDisplay :chartId="view.id" :chartData="view.chartData" />
+        <ChartDisplay
+          v-if="view.chartData"
+          :chartId="'chart_' + view.id"
+          :chartData="view.chartData"
+        />
       </el-tab-pane>
     </el-tabs>
   </div>
 </template>
 
 <script>
-import ChartDisplay from '@/components/ChartDisplay.vue';
-import { getChartOptions, getChartData } from '@/api/analysisApi';
+import ChartDisplay from '@/components/ChartDisplay.vue'
+import { getChartOptions, getChartData } from '@/api/analysisApi'
 
 export default {
   components: {
@@ -59,100 +63,98 @@ export default {
       activeTab: '',
       isTransferVisible: false, // 控制穿梭框的显示与隐藏，初始值为 false
       displayedCharts: [], // 用来展示当前显示的图表选项
-    };
+    }
   },
   mounted() {
-    this.loadChartOptions();
+    this.loadChartOptions()
   },
   methods: {
     // 加载图表选项
     async loadChartOptions() {
       try {
-        const response = await getChartOptions();
-        console.log('Chart options:', response.data); // 打印图表选项
-        this.chartOptions = response.data.data; // 使用返回的数据
-        if (this.chartOptions.length > 0) {
-          this.displayedCharts = this.chartOptions.slice(0, 5); // 默认显示前五个图表
-          this.selectedCharts = [this.chartOptions[0]];
-          this.activeTab = this.chartOptions[0].id;
-          this.loadChartData(this.chartOptions[0]);
+        const response = await getChartOptions()
+        console.log('Chart options:', response.data) // 打印图表选项
+
+        if (response.data && response.data.data && response.data.data.length > 0) {
+          this.chartOptions = response.data.data // 使用返回的数据
+          this.displayedCharts = this.chartOptions.slice(0, 5) // 默认显示前五个图表
+          this.selectedCharts = [this.chartOptions[0]]
+          this.activeTab = this.chartOptions[0].id
+          this.loadChartData(this.chartOptions[0])
+
+          console.log('displayedCharts:', this.displayedCharts) // 确认数据赋值后正确
         } else {
-          console.warn("没有返回任何图表选项");
+          console.warn('没有返回任何图表选项')
         }
       } catch (error) {
-        console.error("加载图表选项失败", error);
+        console.error('加载图表选项失败', error)
       }
     },
-
     // 加载图表数据
     async loadChartData(view) {
       if (!view || !view.id || !view.data_source_type) {
-        console.warn('无效的图表 ID 或 数据源类型');
-        return;
+        console.warn('无效的图表 ID 或 数据源类型')
+        return
       }
 
       try {
-        // 传递 view.id 作为查询参数
-        const response = await getChartData(view.id, view.type, view.data_source_type);
-        console.log(`加载图表数据: ${view.meta.title}`, response.data); // 打印返回的数据
+        const response = await getChartData(view.id, view.type, view.data_source_type)
+        console.log('后端返回的数据:', response.data) // 打印数据
+        console.log('数据类型:', Array.isArray(response.data)) // 确认是否为数组
+        // console.log('响应数据:', response.data); // 打印完整的响应数据
+        // console.log('data 数组:', response.data.data); // 打印 data 数组
+        if (response.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
+          const chartData = response.data.data[0] // 获取第一个图表数据
 
-        // 处理数据
-        const chartData = response.data[0]; // 假设返回的是数组，取第一个图表数据
+          console.log('chartData:', chartData) // 打印chartData，确认它是否有效
 
-        // 解析 values 数据
-        const xAxis = [];
-        const yAxis = [];
+          if (chartData) {
+            const xAxis = chartData.x || []
+            const yAxis = chartData.y || []
 
-        chartData.values.forEach(item => {
-          const x = item.find(value => value.Key === 'x');
-          const y = item.find(value => value.Key === 'y');
+            // 确保 x 和 y 数据不为空
+            if (xAxis.length === 0 || yAxis.length === 0) {
+              console.warn('没有有效的 x 或 y 数据')
+              return
+            }
 
-          if (x && y) {
-            // 将字符串解析为数组
-            const xValue = JSON.parse(x.Value);  // 解析 x 的值
-            const yValue = JSON.parse(y.Value);  // 解析 y 的值
+            // 设置图表数据
+            view.chartData = {
+              title: chartData.meta?.[0]?.Value || '无标题', // 设置标题
+              xAxis: xAxis, // 设置 x 轴数据
+              series: [
+                {
+                  data: yAxis, // 设置 y 轴数据
+                  type: chartData.type || 'line', // 默认为折线图
+                },
+              ],
+            }
 
-            xValue.forEach((xItem, index) => {
-              xAxis.push(xItem);
-              yAxis.push(yValue[index]);
-            });
+            console.log('chartData 已赋值:', view.chartData) // 打印已赋值的chartData
           }
-        });
-
-        console.log('xAxis:', xAxis, 'yAxis:', yAxis); // 打印解析后的 x 和 y 数据
-
-        // 设置图表数据
-        view.chartData = {
-          title: chartData.meta.title || '无标题',
-          xAxis: xAxis,
-          series: [{
-            data: yAxis,
-            type: chartData.type || 'line',  // 默认图表类型为折线图
-          }],
-        };
-
+        } else {
+          console.warn('返回的数据格式不正确或为空')
+        }
       } catch (error) {
-        console.error(`加载图表数据失败: ${view.meta.title}`, error);
+        console.error(`加载图表数据失败: ${view.meta?.[0]?.Value}`, error)
       }
     },
-
-
-
     // 处理穿梭框选项改变
     handleChange(newSelected) {
-      if (newSelected.length > 0 && newSelected[0]) { // 确保 newSelected 中有有效的选项
-        this.activeTab = newSelected[0].id;
-        this.loadChartData(newSelected[0]);
+      if (newSelected.length > 0 && newSelected[0]) {
+        // 确保 newSelected 中有有效的选项
+        this.activeTab = newSelected[0].id
+        this.loadChartData(newSelected[0])
       }
     },
 
     // 切换穿梭框显示状态
     toggleTransfer() {
-      console.log('Toggling transfer visibility', this.isTransferVisible); // 添加调试日志
-      this.isTransferVisible = !this.isTransferVisible;
-    }
-  }
-};
+      console.log('Toggling transfer visibility', this.isTransferVisible) // 添加调试日志
+      this.isTransferVisible = !this.isTransferVisible
+    },
+  },
+}
 </script>
 
 <style scoped>

@@ -136,7 +136,7 @@ const searchQuery = ref('')
 // 表单验证规则
 const formRules = reactive({
   type: [{ required: true, message: '图表类型不能为空', trigger: 'blur' }],
-  'meta.title': [{ required: true, message: '图表标题不能为空', trigger: 'blur' }],
+  'meta[0].Value': [{ required: true, message: '图表标题不能为空', trigger: 'blur' }],
   data_source_type: [{ required: true, message: '请选择数据源类型', trigger: 'blur' }],
   values: [{ required: true, message: '图表数据不能为空', trigger: 'blur' }],
 })
@@ -196,7 +196,7 @@ function openAddDialog() {
   isEditing.value = false
   form.value = {
     type: '',
-    meta: [{ Key: 'title', Value: '' }],
+    meta: [{ Key: 'title', Value: '' }], // 确保meta是一个包含对象的数组
     data_source_type: 'static',
     values: [{ x: [], y: [] }],
   }
@@ -259,13 +259,21 @@ async function submitForm() {
     form.value.values = form.value.values || [{ x: [], y: [] }]
 
     form.value.meta = form.value.meta || [{ Key: 'title', Value: '' }]
-    const xValues = form.value.values?.map((item: any) => item.x) || []
-    const yValues = form.value.values?.map((item: any) => item.y) || []
+
+    // 确保 x 和 y 被正确处理，如果它们是字符串，解析为数组
+    const xValues = form.value.values?.map((item: any) => JSON.parse(item.x)) || []
+    const yValues = form.value.values?.map((item: any) => JSON.parse(item.y)) || []
+
+    // 重新构建 values 格式
+    const valuesFormatted = xValues.map((x, index) => ({
+      x: x,
+      y: yValues[index],
+    }))
 
     const formData = {
       ...form.value,
       meta: [{ Key: 'title', Value: form.value.meta[0]?.Value || '' }],
-      values: [{ x: xValues, y: yValues }], // 确保 values 包含 x 和 y 数组
+      values: valuesFormatted, // 确保 values 格式正确
     }
 
     if (isEditing.value && formData.id) {
