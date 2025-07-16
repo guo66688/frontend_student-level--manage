@@ -40,7 +40,7 @@ export function createStudent(student: Partial<Student>): Promise<Student> {
 
 // 更新学生
 export function updateStudent(id: number, student: Partial<Student>): Promise<Student> {
-  return request.put<Student>(`/students/${id}`, student).then((response) => response.data)
+  return request.put<Student>(`/students/${id}`, student).then((response) => response)
 }
 
 // 删除学生，忽略返回值
