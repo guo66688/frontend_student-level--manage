@@ -11,12 +11,12 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import Layout from './components/Layout.vue'
 
 const route = useRoute()
-// 判断当前路由是否是登录页面
-const isLoginPage = route.name === 'Login'
+
+const isLoginPage = computed(() => route.name === 'Login')
 </script>
 
 <style>
